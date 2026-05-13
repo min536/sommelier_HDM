@@ -163,6 +163,84 @@
         .jump-input::-webkit-outer-spin-button { -webkit-appearance: none; }
         .jump-input[type=number] { -moz-appearance: textfield; }
 
+        /* ───── SORT TOGGLE ───── */
+        .sort-toggle {
+            display: flex; gap: 0; margin-left: auto;
+        }
+        .sort-btn {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            border: 1px solid var(--rule-strong);
+            background: var(--paper);
+            color: var(--muted);
+            padding: 4px 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .sort-btn:first-child { border-right: none; }
+        .sort-btn.active {
+            background: var(--wine);
+            color: #fff;
+            border-color: var(--wine);
+        }
+        .sort-btn:not(.active):hover { color: var(--ink); background: var(--cream); }
+
+        /* ───── MENU CARD GRID ───── */
+        .menu-group-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 14px;
+            letter-spacing: 0.22em;
+            color: var(--gold);
+            text-transform: uppercase;
+            padding: 16px 20px 10px;
+            border-bottom: 1px solid var(--rule);
+        }
+        .menu-group-title:not(:first-child) {
+            border-top: 1px solid var(--rule);
+        }
+        .menu-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0;
+            padding: 0;
+        }
+        .menu-card {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--rule);
+            border-right: 1px solid var(--rule);
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .menu-card-name {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 600;
+            font-size: 13.5px;
+            color: var(--ink);
+            line-height: 1.4;
+        }
+        .menu-card-fields {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .menu-card-fields .field-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--muted);
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .menu-card-fields .input-sm {
+            width: 80px;
+        }
+        .menu-card-apply {
+            margin-left: auto;
+        }
+
         /* ───── TABLE CARDS ───── */
         #display {
             display: grid;
@@ -270,14 +348,14 @@
             vertical-align: middle;
         }
         .order-seq {
+            display: block;
             font-family: 'Cormorant Garamond', serif;
             font-style: italic;
-            font-size: 11px;
-            color: var(--muted);
-            margin-right: 8px;
+            font-size: 13.5px;
+            color: var(--gold);
             white-space: nowrap;
-            letter-spacing: 0.05em;
-            vertical-align: middle;
+            letter-spacing: 0.06em;
+            margin-bottom: 2px;
         }
         .order-row > div:first-child { min-width: 0; flex: 1; }
         .btn-group { display: flex; gap: 5px; flex-shrink: 0; }
@@ -320,35 +398,12 @@
         }
         .clear-btn:hover { background: var(--wine-deep); }
 
-        /* ───── MENU TABLE ───── */
+        /* ───── MENU PANEL ───── */
         .panel {
             background: var(--paper);
             border: 1px solid var(--rule);
             padding: 0;
         }
-        .menu-table { width: 100%; border-collapse: collapse; }
-        .menu-table th {
-            background: var(--cream);
-            font-family: 'Cormorant Garamond', serif;
-            font-style: italic;
-            font-weight: 500;
-            font-size: 12px;
-            letter-spacing: 0.2em;
-            color: var(--muted);
-            text-transform: uppercase;
-            text-align: left;
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--rule);
-        }
-        .menu-table td {
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--rule);
-            font-size: 14px;
-            vertical-align: middle;
-        }
-        .menu-table tr:last-child td { border-bottom: none; }
-        .menu-table tr:hover td { background: rgba(184,146,74,0.04); }
-        .menu-name-cell { font-family: 'Noto Serif KR', serif; font-weight: 600; }
         .cat-tag {
             font-family: 'Cormorant Garamond', serif;
             font-style: italic;
@@ -436,33 +491,13 @@
             .mini-btn { padding: 5px 7px; font-size: 10px; min-height: 31px; }
             .mini-btn.del { padding: 5px 6px; min-width: 31px; }
 
-            /* Menu management: switch from table to stacked cards on mobile */
-            .menu-table thead { display: none; }
-            .menu-table, .menu-table tbody, .menu-table tr, .menu-table td { display: block; width: 100%; }
-            .menu-table tr {
-                padding: 14px 16px;
-                border-bottom: 1px solid var(--rule);
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                grid-template-areas:
-                    "name name"
-                    "cat  apply"
-                    "price stock";
-                gap: 10px 12px;
-                align-items: center;
-            }
-            .menu-table tr:last-child { border-bottom: none; }
-            .menu-table tr:hover td { background: transparent; }
-            .menu-table td { padding: 0; border: none; }
-            .menu-table td:nth-child(1) { grid-area: name; font-size: 14.5px; }
-            .menu-table td:nth-child(2) { grid-area: cat; }
-            .menu-table td:nth-child(3) { grid-area: price; }
-            .menu-table td:nth-child(3)::before { content: 'Price'; display: block; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:10.5px; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase; margin-bottom: 4px; }
-            .menu-table td:nth-child(4) { grid-area: stock; }
-            .menu-table td:nth-child(4)::before { content: 'Stock'; display: block; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:10.5px; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase; margin-bottom: 4px; }
-            .menu-table td:nth-child(5) { grid-area: apply; text-align: right !important; align-self: start; }
-            .input-sm { width: 100%; padding: 9px 10px; font-size: 14px; }
-            .btn-save { padding: 8px 16px; font-size: 12px; }
+            /* Menu management: single column on mobile */
+            .menu-card-grid { grid-template-columns: 1fr; }
+            .menu-card { border-right: none; }
+            .menu-card-fields { flex-wrap: wrap; }
+            .menu-card-fields .input-sm { width: 70px; }
+            .sort-toggle { margin-left: 0; }
+            .sort-btn { font-size: 10px; padding: 3px 8px; }
             .credit { margin-top: 36px; font-size: 11px; letter-spacing: 0.18em; }
             .export-actions { justify-content: stretch; }
             .export-actions .export-btn { width: 100%; }
@@ -518,6 +553,10 @@ window.addEventListener('error', function(e){
         <span class="section-title">테이블 실시간 현황</span>
         <span class="section-rule"></span>
         <span class="section-meta">Live · 5s</span>
+        <div class="sort-toggle">
+            <button class="sort-btn active" id="sort-table" onclick="setSortMode('table')">테이블 번호순</button>
+            <button class="sort-btn" id="sort-order" onclick="setSortMode('order')">주문순</button>
+        </div>
         <input type="number" class="jump-input" min="1" placeholder="# 이동" title="테이블 번호로 이동" oninput="jumpToTable(this.value)">
     </div>
     <div id="display"></div>
@@ -528,28 +567,27 @@ window.addEventListener('error', function(e){
         <span class="section-rule"></span>
         <span class="section-meta">Menu &amp; Stock</span>
     </div>
-    <div class="panel">
-        <table class="menu-table">
-            <thead>
-                <tr>
-                    <th>Item</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th style="text-align:right;">Action</th>
-                </tr>
-            </thead>
-            <tbody id="menu-management-list"></tbody>
-        </table>
-    </div>
+    <div class="panel" id="menu-management-panel"></div>
 
     <div class="export-actions">
         <button class="export-btn" onclick="downloadSales()">판매내역 Excel</button>
     </div>
 
-    <div class="credit">— System designed by 창식 · 동민 —</div>
+    <div class="credit">— System designed by 동민 · 창식 —</div>
 
     <script>
+        let tableSortMode = 'table';
+
+        function setSortMode(mode) {
+            tableSortMode = mode;
+            document.getElementById('sort-table').className = 'sort-btn' + (mode === 'table' ? ' active' : '');
+            document.getElementById('sort-order').className = 'sort-btn' + (mode === 'order' ? ' active' : '');
+            refresh();
+        }
+
+        const CATEGORY_GROUP = { liquor: 'WINE', food: 'FOOD' };
+        function menuGroup(cat) { return CATEGORY_GROUP[cat] || 'ETC'; }
+
         function formatDuration(mins) {
             if (mins < 60) return `${mins}분`;
             const h = Math.floor(mins / 60);
@@ -561,21 +599,49 @@ window.addEventListener('error', function(e){
             fetch('/api/orders').then(r => r.json()).then(res => {
                 document.getElementById('total-rev').innerText = res.cumulative_revenue.toLocaleString();
 
-                const menuList = document.getElementById('menu-management-list');
-                menuList.innerHTML = res.menu.map(m => `
-                    <tr>
-                        <td class="menu-name-cell">${m.name}${m.is_alcohol ? ' <span class="cat-tag" style="margin-left:6px;">Wine</span>' : ''}</td>
-                        <td><span class="cat-tag">${m.category}</span></td>
-                        <td><input type="number" id="p-${m.id}" class="input-sm" value="${m.price}"></td>
-                        <td><input type="number" id="s-${m.id}" class="input-sm" value="${m.stock}"></td>
-                        <td style="text-align:right;"><button class="btn-save" onclick="updateMenu(${m.id})">APPLY</button></td>
-                    </tr>
-                `).join('');
+                // ── Menu management: grouped card layout ──
+                const menuPanel = document.getElementById('menu-management-panel');
+                const groups = { WINE: [], FOOD: [], ETC: [] };
+                res.menu.forEach(m => { groups[menuGroup(m.category)].push(m); });
+                let menuHtml = '';
+                ['WINE', 'FOOD', 'ETC'].forEach(g => {
+                    if (!groups[g].length) return;
+                    menuHtml += `<div class="menu-group-title">${g}</div><div class="menu-card-grid">`;
+                    groups[g].forEach(m => {
+                        menuHtml += `
+                            <div class="menu-card">
+                                <div class="menu-card-name">${m.name}</div>
+                                <div class="menu-card-fields">
+                                    <span class="field-label">Price</span>
+                                    <input type="number" id="p-${m.id}" class="input-sm" value="${m.price}">
+                                    <span class="field-label">Stock</span>
+                                    <input type="number" id="s-${m.id}" class="input-sm" value="${m.stock}">
+                                    <button class="btn-save menu-card-apply" onclick="updateMenu(${m.id})">APPLY</button>
+                                </div>
+                            </div>`;
+                    });
+                    menuHtml += `</div>`;
+                });
+                menuPanel.innerHTML = menuHtml;
 
+                // ── Table cards: sort ──
                 const container = document.getElementById('display');
                 container.innerHTML = '';
 
-                Object.keys(res.tables).sort((a,b)=>Number(a)-Number(b)).forEach(id => {
+                let tableIds = Object.keys(res.tables);
+                if (tableSortMode === 'order') {
+                    tableIds.sort((a, b) => {
+                        const ordersA = res.tables[a].orders;
+                        const ordersB = res.tables[b].orders;
+                        const minA = ordersA.length ? Math.min(...ordersA.map(o => o.order_id)) : Infinity;
+                        const minB = ordersB.length ? Math.min(...ordersB.map(o => o.order_id)) : Infinity;
+                        return minA - minB;
+                    });
+                } else {
+                    tableIds.sort((a, b) => Number(a) - Number(b));
+                }
+
+                tableIds.forEach(id => {
                     const info = res.tables[id];
                     const diffMins = Math.floor((new Date() - new Date(info.entry_time)) / 60000);
                     const isLongStay = diffMins >= 120;
