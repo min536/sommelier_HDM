@@ -7,7 +7,7 @@
             "price": 32000,
             "is_alcohol": true,
             "stock": 20,
-            "img": "Sparkling.png",
+            "img": "sparkling.png",
             "is_best": false
         },
         {
@@ -17,7 +17,7 @@
             "price": 28000,
             "is_alcohol": true,
             "stock": 40,
-            "img": "Dessert.jpg",
+            "img": "dessert.png",
             "is_best": false
         },
         {
@@ -27,7 +27,7 @@
             "price": 37000,
             "is_alcohol": true,
             "stock": 20,
-            "img": "red.jpg",
+            "img": "red.png",
             "is_best": false
         },
         {
@@ -37,7 +37,7 @@
             "price": 35000,
             "is_alcohol": true,
             "stock": 20,
-            "img": "White.png",
+            "img": "white.png",
             "is_best": false
         },
         {
@@ -107,7 +107,7 @@
             "price": 5000,
             "is_alcohol": false,
             "stock": 999,
-            "img": "plus.jpg",
+            "img": "plus.png",
             "is_best": false
         },
         {
@@ -127,7 +127,7 @@
             "price": 100000,
             "is_alcohol": true,
             "stock": 6,
-            "img": "premium.jpg",
+            "img": "premium.png",
             "is_best": false
         }
     ],

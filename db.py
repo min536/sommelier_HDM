@@ -12,8 +12,8 @@ DEFAULT_SQLITE_PATH = ROOT / "sommelier.sqlite3"
 
 INITIAL_MENU = [
     {"id": 1, "category": "liquor", "name": "Jaume Serra Cava(스파클링)", "price": 32000, "is_alcohol": True, "stock": 20, "img": "sparkling.png", "is_best": False},
-    {"id": 2, "category": "liquor", "name": "Rapel Carilisa Moscato(디저트)", "price": 28000, "is_alcohol": True, "stock": 40, "img": "dessert.jpg", "is_best": False},
-    {"id": 3, "category": "liquor", "name": "Umani Ronchi Vigor(레드)", "price": 37000, "is_alcohol": True, "stock": 20, "img": "red.jpg", "is_best": False},
+    {"id": 2, "category": "liquor", "name": "Rapel Carilisa Moscato(디저트)", "price": 28000, "is_alcohol": True, "stock": 40, "img": "dessert.png", "is_best": False},
+    {"id": 3, "category": "liquor", "name": "Umani Ronchi Vigor(레드)", "price": 37000, "is_alcohol": True, "stock": 20, "img": "red.png", "is_best": False},
     {"id": 4, "category": "liquor", "name": "Montford Estate(화이트)", "price": 35000, "is_alcohol": True, "stock": 20, "img": "white.png", "is_best": False},
     {"id": 5, "category": "food", "name": "나쵸 세트", "price": 15000, "is_alcohol": False, "stock": 50, "img": "nacho.png", "is_best": False},
     {"id": 6, "category": "food", "name": "오레오베이컨말이(6pcs)", "price": 13000, "is_alcohol": False, "stock": 40, "img": "oreo.png", "is_best": True},
@@ -21,10 +21,20 @@ INITIAL_MENU = [
     {"id": 8, "category": "food", "name": "소시지 플래터", "price": 19000, "is_alcohol": False, "stock": 50, "img": "sausage.png", "is_best": False},
     {"id": 9, "category": "food", "name": "버섯크림 파스타", "price": 23000, "is_alcohol": False, "stock": 50, "img": "pasta.png", "is_best": True},
     {"id": 10, "category": "food", "name": "치즈케이크", "price": 8000, "is_alcohol": False, "stock": 30, "img": "cheeze.png", "is_best": False},
-    {"id": 11, "category": "etc", "name": "합석 비용", "price": 5000, "is_alcohol": False, "stock": 999, "img": "plus.jpg", "is_best": False},
+    {"id": 11, "category": "etc", "name": "합석 비용", "price": 5000, "is_alcohol": False, "stock": 999, "img": "plus.png", "is_best": False},
     {"id": 12, "category": "etc", "name": "물", "price": 1000, "is_alcohol": False, "stock": 100, "img": "water.png", "is_best": False},
-    {"id": 13, "category": "etc", "name": "프리미엄 와인(판매 이전 운영팀 문의)", "price": 100000, "is_alcohol": True, "stock": 6, "img": "premium.jpg", "is_best": False},
+    {"id": 13, "category": "etc", "name": "프리미엄 와인(판매 이전 운영팀 문의)", "price": 100000, "is_alcohol": True, "stock": 6, "img": "premium.png", "is_best": False},
 ]
+
+LEGACY_IMAGE_NAME_UPDATES = {
+    "Sparkling.png": "sparkling.png",
+    "White.png": "white.png",
+    "Dessert.jpg": "dessert.png",
+    "dessert.jpg": "dessert.png",
+    "red.jpg": "red.png",
+    "plus.jpg": "plus.png",
+    "premium.jpg": "premium.png",
+}
 
 
 def sqlite_path() -> Path:
@@ -143,6 +153,10 @@ def init_db() -> None:
                     for item in INITIAL_MENU
                 ],
             )
+        conn.executemany(
+            "UPDATE menu_items SET img = ? WHERE img = ?",
+            [(current, legacy) for legacy, current in LEGACY_IMAGE_NAME_UPDATES.items()],
+        )
         conn.execute(
             """
             INSERT OR IGNORE INTO order_ledger
