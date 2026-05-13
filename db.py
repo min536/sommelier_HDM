@@ -5,6 +5,9 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
+
+_KST = ZoneInfo("Asia/Seoul")
 
 
 ROOT = Path(__file__).resolve().parent
@@ -209,7 +212,7 @@ def get_table_status(table_id: str) -> dict[str, object]:
         ).fetchone()
         rows = conn.execute(
             """
-            SELECT menu_name, price, status, is_paid, display_time
+            SELECT id, menu_name, price, status, is_paid, display_time
             FROM orders
             WHERE table_id = ?
             ORDER BY id
@@ -222,6 +225,7 @@ def get_table_status(table_id: str) -> dict[str, object]:
         "entry_time": table["entry_time"],
         "orders": [
             {
+                "order_id": row["id"],
                 "menu_name": row["menu_name"],
                 "price": row["price"],
                 "status": row["status"],
@@ -249,6 +253,7 @@ def get_dashboard_data() -> dict[str, object]:
             SELECT
                 t.table_id,
                 t.entry_time,
+                o.id AS order_id,
                 o.menu_name,
                 o.price,
                 o.status,
@@ -274,6 +279,7 @@ def get_dashboard_data() -> dict[str, object]:
         if row["menu_name"] is None:
             continue
         order = {
+            "order_id": row["order_id"],
             "menu_name": row["menu_name"],
             "price": row["price"],
             "status": row["status"],
@@ -356,7 +362,7 @@ def get_sales_export_data() -> dict[str, object]:
 
 
 def place_order(table_id: str, item_names: list[str]) -> None:
-    now = datetime.now()
+    now = datetime.now(_KST)
     now_iso = now.isoformat()
     with connection() as conn:
         try:
@@ -435,24 +441,13 @@ def update_menu_item(menu_id: int, price: int, stock: int) -> None:
         conn.commit()
 
 
-def _order_id_for_index(conn: sqlite3.Connection, table_id: str, order_idx: int) -> int | None:
-    row = conn.execute(
-        """
-        SELECT id
-        FROM orders
-        WHERE table_id = ?
-        ORDER BY id
-        LIMIT 1 OFFSET ?
-        """,
-        (table_id, order_idx),
-    ).fetchone()
-    return None if not row else row["id"]
-
-
-def toggle_item_pay(table_id: str, order_idx: int) -> bool:
+def toggle_item_pay(table_id: str, order_id: int) -> bool:
     with connection() as conn:
-        order_id = _order_id_for_index(conn, table_id, order_idx)
-        if order_id is None:
+        row = conn.execute(
+            "SELECT id FROM orders WHERE id = ? AND table_id = ?",
+            (order_id, table_id),
+        ).fetchone()
+        if row is None:
             return False
         conn.execute(
             "UPDATE orders SET is_paid = CASE WHEN is_paid = 1 THEN 0 ELSE 1 END WHERE id = ?",
@@ -470,10 +465,13 @@ def toggle_item_pay(table_id: str, order_idx: int) -> bool:
         return True
 
 
-def toggle_serve(table_id: str, order_idx: int) -> bool:
+def toggle_serve(table_id: str, order_id: int) -> bool:
     with connection() as conn:
-        order_id = _order_id_for_index(conn, table_id, order_idx)
-        if order_id is None:
+        row = conn.execute(
+            "SELECT id FROM orders WHERE id = ? AND table_id = ?",
+            (order_id, table_id),
+        ).fetchone()
+        if row is None:
             return False
         conn.execute(
             """
@@ -495,17 +493,13 @@ def toggle_serve(table_id: str, order_idx: int) -> bool:
         return True
 
 
-def cancel_order(table_id: str, order_idx: int) -> bool:
+def cancel_order(table_id: str, order_id: int) -> bool:
     with connection() as conn:
         try:
             conn.execute("BEGIN IMMEDIATE")
-            order_id = _order_id_for_index(conn, table_id, order_idx)
-            if order_id is None:
-                conn.rollback()
-                return False
             item = conn.execute(
-                "SELECT menu_name, price FROM orders WHERE id = ?",
-                (order_id,),
+                "SELECT menu_name, price, menu_item_id FROM orders WHERE id = ? AND table_id = ?",
+                (order_id, table_id),
             ).fetchone()
             if not item:
                 conn.rollback()
@@ -516,9 +510,14 @@ def cancel_order(table_id: str, order_idx: int) -> bool:
                 SET final_state = 'cancelled', cancelled_at = ?, source_order_id = NULL
                 WHERE source_order_id = ?
                 """,
-                (datetime.now().isoformat(), order_id),
+                (datetime.now(_KST).isoformat(), order_id),
             )
             conn.execute("DELETE FROM orders WHERE id = ?", (order_id,))
+            if item["menu_item_id"] is not None:
+                conn.execute(
+                    "UPDATE menu_items SET stock = stock + 1 WHERE id = ?",
+                    (item["menu_item_id"],),
+                )
             conn.execute(
                 "UPDATE app_metrics SET cumulative_revenue = cumulative_revenue - ? WHERE id = 1",
                 (item["price"],),
@@ -549,7 +548,7 @@ def clear_table(table_id: str) -> bool:
             if not table:
                 conn.rollback()
                 return False
-            now_iso = datetime.now().isoformat()
+            now_iso = datetime.now(_KST).isoformat()
             conn.execute(
                 """
                 UPDATE order_ledger

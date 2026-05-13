@@ -142,22 +142,23 @@
         .si-state {
             font-family: 'Cormorant Garamond', serif;
             font-style: italic;
-            font-size: 11.5px;
+            font-size: 12.5px;
             letter-spacing: 0.15em;
             color: var(--muted);
             text-transform: uppercase;
             margin-top: 2px;
             display: block;
         }
-        .si-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .si-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .mini-btn {
             font-family: 'Pretendard', sans-serif;
-            font-size: 11.5px;
+            font-size: 12.5px;
             font-weight: 600;
             border: 1px solid var(--rule-strong);
             background: var(--paper);
             color: var(--ink);
-            padding: 6px 12px;
+            padding: 8px 14px;
+            min-height: 40px;
             cursor: pointer;
             transition: all 0.15s;
         }
@@ -367,6 +368,7 @@
             color: var(--muted);
             border: 1px solid var(--rule);
             padding: 13px;
+            min-height: 48px;
             cursor: pointer;
             font-weight: 600;
             font-size: 13px;
@@ -378,6 +380,7 @@
             color: var(--paper);
             border: none;
             padding: 13px;
+            min-height: 48px;
             cursor: pointer;
             font-weight: 700;
             font-size: 13px;
@@ -385,6 +388,57 @@
             transition: background 0.15s;
         }
         .btn-submit:hover { background: var(--wine-deep); }
+        .btn-submit:disabled { background: var(--muted); cursor: not-allowed; opacity: 0.75; }
+        .cart-total {
+            text-align: right;
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--wine-deep);
+            padding: 14px 0 0;
+            border-top: 1px solid var(--rule-strong);
+            margin-top: 4px;
+            letter-spacing: 0.02em;
+        }
+        .qty-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .qty-btn {
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--rule-strong);
+            background: var(--cream);
+            color: var(--wine-deep);
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .qty-btn:hover { background: var(--wine); color: var(--paper); border-color: var(--wine); }
+        .qty-display {
+            min-width: 24px;
+            text-align: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 700;
+            color: var(--wine);
+            font-size: 16px;
+        }
+        .cart-modal-empty {
+            text-align: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            color: var(--muted);
+            padding: 14px 0;
+            font-size: 14px;
+        }
 
         /* footer credit */
         .credit {
@@ -415,7 +469,7 @@
             .status-item { padding: 11px 0; gap: 8px; }
             .si-name { font-size: 13px; }
             .si-actions { flex-shrink: 0; }
-            .mini-btn { white-space: nowrap; min-height: 32px; padding: 6px 10px; font-size: 11.5px; }
+            .mini-btn { white-space: nowrap; min-height: 40px; padding: 8px 12px; font-size: 12.5px; }
 
             .cat { margin: 30px 0 14px; gap: 10px; }
             .cat-name { font-size: 16px; }
@@ -434,7 +488,7 @@
                 gap: 10px;
             }
             .cart-bar > div:first-child { min-width: 0; flex: 1; }
-            .cart-label { font-size: 10.5px; letter-spacing: 0.18em; }
+            .cart-label { font-size: 11.5px; letter-spacing: 0.18em; }
             .cart-count {
                 font-size: 14px;
                 white-space: nowrap;
@@ -553,6 +607,7 @@ window.addEventListener('error', function(e){
         <div class="modal-label">Order Confirmation</div>
         <div class="modal-title">주문 내역 확인</div>
         <div id="modal-items-list"></div>
+        <div class="cart-total" id="cart-total"></div>
         <div class="modal-actions">
             <button class="btn-close" onclick="closeCart()">닫기</button>
             <button class="btn-submit" onclick="submitOrder()">최종 주문 넣기</button>
@@ -563,6 +618,7 @@ window.addEventListener('error', function(e){
 <script>
     let currentTable = document.getElementById('target-table-id').value;
     let cart = [];
+    let submitting = false;
 
     function changeTable() {
         currentTable = document.getElementById('target-table-id').value;
@@ -585,21 +641,64 @@ window.addEventListener('error', function(e){
         document.getElementById('cart-text').innerText = `${cart.length}개 선택 · Table ${currentTable}`;
     }
 
-    function openCart() {
+    function renderCartModal() {
         const list = document.getElementById('modal-items-list');
-        const grouped = cart.reduce((acc, i) => { acc[i.name] = (acc[i.name] || 0) + 1; return acc; }, {});
-        list.innerHTML = Object.keys(grouped).map(name => `
-            <div class="cart-row">
-                <div class="cart-row-name">${name}</div>
-                <div class="cart-row-count">× ${grouped[name]}</div>
-            </div>
-        `).join('');
+        const totalEl = document.getElementById('cart-total');
+        if (cart.length === 0) {
+            list.innerHTML = '<div class="cart-modal-empty">담긴 메뉴가 없습니다.</div>';
+            totalEl.innerText = '';
+            return;
+        }
+        const grouped = cart.reduce((acc, i) => {
+            if (!acc[i.name]) acc[i.name] = { price: i.price, count: 0 };
+            acc[i.name].count++;
+            return acc;
+        }, {});
+        list.innerHTML = Object.keys(grouped).map(name => {
+            const safeName = name.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+            const { price, count } = grouped[name];
+            return `
+                <div class="cart-row">
+                    <div class="cart-row-name">${safeName}</div>
+                    <div class="qty-ctrl">
+                        <button class="qty-btn" data-name="${safeName}" onclick="removeFromCart(this.dataset.name)">−</button>
+                        <span class="qty-display">${count}</span>
+                        <button class="qty-btn" data-name="${safeName}" data-price="${price}" onclick="addToCartFromModal(this.dataset.name, Number(this.dataset.price))">+</button>
+                    </div>
+                </div>`;
+        }).join('');
+        const total = cart.reduce((sum, i) => sum + i.price, 0);
+        totalEl.innerText = `총액: ${total.toLocaleString('ko-KR')}원`;
+    }
+
+    function openCart() {
+        renderCartModal();
         document.getElementById('cart-modal').style.display = 'block';
+    }
+
+    function addToCartFromModal(name, price) {
+        cart.push({ name, price });
+        updateCartBar();
+        renderCartModal();
+    }
+
+    function removeFromCart(name) {
+        const idx = cart.findIndex(i => i.name === name);
+        if (idx !== -1) cart.splice(idx, 1);
+        updateCartBar();
+        if (cart.length === 0) { closeCart(); return; }
+        renderCartModal();
     }
 
     function closeCart() { document.getElementById('cart-modal').style.display = 'none'; }
 
     function submitOrder() {
+        if (cart.length === 0) { alert("담긴 메뉴가 없습니다."); return; }
+        if (submitting) return;
+        submitting = true;
+        const btn = document.querySelector('.btn-submit');
+        btn.disabled = true;
+        btn.innerText = '주문 처리 중...';
         fetch('/api/order', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -609,6 +708,12 @@ window.addEventListener('error', function(e){
                 alert(`${currentTable}번 주문 완료!`);
                 cart = []; updateCartBar(); closeCart(); fetchStatus();
             } else { alert("오류: " + data.message); }
+        }).catch(() => {
+            alert("네트워크 오류가 발생했습니다. 다시 시도해 주세요.");
+        }).finally(() => {
+            submitting = false;
+            btn.disabled = false;
+            btn.innerText = '최종 주문 넣기';
         });
     }
 
@@ -621,10 +726,10 @@ window.addEventListener('error', function(e){
                 list.innerHTML = '<div class="empty-state">주문 내역이 없습니다.</div>';
                 return;
             }
-            const grouped = activeOrders.reduce((acc, o, idx) => {
+            const grouped = activeOrders.reduce((acc, o) => {
                 const key = `${o.menu_name}-${o.status}`;
-                if (!acc[key]) acc[key] = { name: o.menu_name, status: o.status, count: 0, indices: [] };
-                acc[key].count++; acc[key].indices.push(idx); return acc;
+                if (!acc[key]) acc[key] = { name: o.menu_name, status: o.status, count: 0, orderIds: [] };
+                acc[key].count++; acc[key].orderIds.push(o.order_id); return acc;
             }, {});
             list.innerHTML = Object.values(grouped).map(g => `
                 <div class="status-item">
@@ -633,15 +738,15 @@ window.addEventListener('error', function(e){
                         <span class="si-state">${g.status}</span>
                     </div>
                     <div class="si-actions">
-                        <button class="mini-btn serve" onclick="toggleServe(${g.indices[0]})">처리</button>
-                        <button class="mini-btn cancel" onclick="cancelOrder(${g.indices[0]})">삭제</button>
+                        <button class="mini-btn serve" onclick="toggleServe(${g.orderIds[0]})">처리</button>
+                        <button class="mini-btn cancel" onclick="cancelOrder(${g.orderIds[0]})">삭제</button>
                     </div>
                 </div>`).join('');
         }).catch(()=>{});
     }
 
-    function toggleServe(idx) { fetch('/api/serve', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({table_id:currentTable, order_idx:idx})}).then(fetchStatus); }
-    function cancelOrder(idx) { if(confirm("삭제하시겠습니까?")) fetch('/api/cancel_order', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({table_id:currentTable, order_idx:idx})}).then(fetchStatus); }
+    function toggleServe(orderId) { fetch('/api/serve', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({table_id:currentTable, order_id:orderId})}).then(fetchStatus); }
+    function cancelOrder(orderId) { if(confirm("삭제하시겠습니까?")) fetch('/api/cancel_order', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({table_id:currentTable, order_id:orderId})}).then(fetchStatus); }
 
     setInterval(fetchStatus, 5000);
     if(currentTable) fetchStatus();

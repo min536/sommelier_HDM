@@ -22,6 +22,18 @@ from db import (
 app = Flask(__name__)
 init_db()
 
+
+# ── request validation helpers ──────────────────────────────────────────
+def _bad(msg: str):
+    """Return a JSON 400 error response."""
+    return jsonify({"status": "error", "message": msg}), 400
+
+
+def _valid_order_id(value) -> bool:
+    """True if value is a positive integer (not bool) suitable as order_id."""
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
 @app.route('/')
 def home():
     return redirect(url_for('guest_menu'))
@@ -40,9 +52,15 @@ def admin_panel():
 
 @app.route('/api/order', methods=['POST'])
 def place_order():
-    req = request.json
-    table_id = str(req.get('table_id'))
+    req = request.get_json(silent=True)
+    if req is None:
+        return _bad("요청 본문이 올바른 JSON 형식이어야 합니다.")
+    table_id = str(req.get('table_id', '')).strip()
+    if not table_id:
+        return _bad("테이블 번호가 없거나 비어 있습니다.")
     items = req.get('items', [])
+    if not isinstance(items, list) or not items:
+        return _bad("주문 항목이 없습니다.")
     try:
         place_order_record(table_id, items)
         return jsonify({"status": "success"})
@@ -127,37 +145,77 @@ def get_table_status(table_id):
 
 @app.route('/api/admin/update_menu', methods=['POST'])
 def admin_update_menu():
-    req = request.json
-    update_menu_item(int(req['id']), int(req['price']), int(req['stock']))
+    req = request.get_json(silent=True)
+    if req is None:
+        return _bad("요청 본문이 올바른 JSON 형식이어야 합니다.")
+    try:
+        menu_id = int(req['id'])
+        price = int(req['price'])
+        stock = int(req['stock'])
+    except (KeyError, TypeError, ValueError):
+        return _bad("id, price, stock 값이 올바르지 않습니다.")
+    if menu_id <= 0:
+        return _bad("메뉴 ID가 올바르지 않습니다.")
+    if price < 0:
+        return _bad("가격은 0 이상이어야 합니다.")
+    if stock < 0:
+        return _bad("재고는 0 이상이어야 합니다.")
+    update_menu_item(menu_id, price, stock)
     return jsonify({"status": "success"})
 
 @app.route('/api/item_pay', methods=['POST'])
 def toggle_item_pay():
-    req = request.json
-    t_id, idx = str(req.get('table_id')), req.get('order_idx')
-    if toggle_item_pay_record(t_id, idx):
+    req = request.get_json(silent=True)
+    if req is None:
+        return _bad("요청 본문이 올바른 JSON 형식이어야 합니다.")
+    t_id = str(req.get('table_id', '')).strip()
+    if not t_id:
+        return _bad("테이블 번호가 없거나 비어 있습니다.")
+    oid = req.get('order_id')
+    if not _valid_order_id(oid):
+        return _bad("order_id가 올바르지 않습니다.")
+    if toggle_item_pay_record(t_id, oid):
         return jsonify({"status": "success"})
     return jsonify({"status": "fail"}), 400
 
 @app.route('/api/serve', methods=['POST'])
 def toggle_serve():
-    req = request.json
-    t_id, idx = str(req.get('table_id')), req.get('order_idx')
-    if toggle_serve_record(t_id, idx):
+    req = request.get_json(silent=True)
+    if req is None:
+        return _bad("요청 본문이 올바른 JSON 형식이어야 합니다.")
+    t_id = str(req.get('table_id', '')).strip()
+    if not t_id:
+        return _bad("테이블 번호가 없거나 비어 있습니다.")
+    oid = req.get('order_id')
+    if not _valid_order_id(oid):
+        return _bad("order_id가 올바르지 않습니다.")
+    if toggle_serve_record(t_id, oid):
         return jsonify({"status": "success"})
     return jsonify({"status": "fail"}), 400
 
 @app.route('/api/cancel_order', methods=['POST'])
 def cancel_order():
-    req = request.json
-    t_id, idx = str(req.get('table_id')), req.get('order_idx')
-    if cancel_order_record(t_id, idx):
+    req = request.get_json(silent=True)
+    if req is None:
+        return _bad("요청 본문이 올바른 JSON 형식이어야 합니다.")
+    t_id = str(req.get('table_id', '')).strip()
+    if not t_id:
+        return _bad("테이블 번호가 없거나 비어 있습니다.")
+    oid = req.get('order_id')
+    if not _valid_order_id(oid):
+        return _bad("order_id가 올바르지 않습니다.")
+    if cancel_order_record(t_id, oid):
         return jsonify({"status": "success"})
     return jsonify({"status": "fail"}), 400
 
 @app.route('/api/clear', methods=['POST'])
 def clear_table():
-    t_id = str(request.json.get('table_id'))
+    req = request.get_json(silent=True)
+    if req is None:
+        return _bad("요청 본문이 올바른 JSON 형식이어야 합니다.")
+    t_id = str(req.get('table_id', '')).strip()
+    if not t_id:
+        return _bad("테이블 번호가 없거나 비어 있습니다.")
     if clear_table_record(t_id):
         return jsonify({"status": "success"})
     return jsonify({"status": "fail"}), 400

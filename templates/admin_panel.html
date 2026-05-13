@@ -239,12 +239,13 @@
         .mini-btn {
             font-family: 'Pretendard', sans-serif;
             white-space: nowrap;
-            font-size: 11.5px;
+            font-size: 12px;
             font-weight: 600;
             border: 1px solid var(--rule-strong);
             background: var(--paper);
             color: var(--ink);
-            padding: 5px 10px;
+            padding: 7px 12px;
+            min-height: 38px;
             cursor: pointer;
             letter-spacing: 0.02em;
             transition: all 0.15s ease;
@@ -254,7 +255,7 @@
         .mini-btn.pay.is-paid { background: var(--success); color: white; border-color: var(--success); }
         .mini-btn.serve { color: var(--ink); }
         .mini-btn.serve.is-done { color: var(--muted); }
-        .mini-btn.del { color: var(--muted); padding: 5px 8px; }
+        .mini-btn.del { color: var(--muted); padding: 7px 10px; }
         .mini-btn.del:hover { color: var(--alert); border-color: var(--alert); }
 
         .card-foot { padding: 0 20px 18px; margin-top: auto; }
@@ -265,7 +266,8 @@
             background: var(--ink);
             color: var(--paper);
             border: none;
-            padding: 12px;
+            padding: 13px 12px;
+            min-height: 46px;
             cursor: pointer;
             letter-spacing: 0.1em;
             font-size: 13px;
@@ -384,9 +386,9 @@
             .order-row { font-size: 13px; gap: 8px; }
             .order-name { font-size: 13px; }
             .card-foot { padding: 0 16px 16px; }
-            .clear-btn { padding: 12px; font-size: 12.5px; }
-            .mini-btn { padding: 7px 10px; font-size: 12px; min-height: 32px; }
-            .mini-btn.del { padding: 7px 9px; }
+            .clear-btn { padding: 14px 12px; font-size: 12.5px; min-height: 48px; }
+            .mini-btn { padding: 9px 12px; font-size: 12.5px; min-height: 42px; }
+            .mini-btn.del { padding: 9px 11px; }
 
             /* Menu management: switch from table to stacked cards on mobile */
             .menu-table thead { display: none; }
@@ -495,6 +497,13 @@ window.addEventListener('error', function(e){
     <div class="credit">— System designed by 창식 · 동민 —</div>
 
     <script>
+        function formatDuration(mins) {
+            if (mins < 60) return `${mins}분`;
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            return m === 0 ? `${h}시간` : `${h}시간 ${m}분`;
+        }
+
         function refresh() {
             fetch('/api/orders').then(r => r.json()).then(res => {
                 document.getElementById('total-rev').innerText = res.cumulative_revenue.toLocaleString();
@@ -519,11 +528,11 @@ window.addEventListener('error', function(e){
                     const isLongStay = diffMins >= 120;
                     const isAllPaid = info.remaining_bill === 0;
 
-                    const groupedOrders = info.orders.reduce((acc, o, idx) => {
+                    const groupedOrders = info.orders.reduce((acc, o) => {
                         const key = `${o.menu_name}_${o.status}_${o.is_paid}`;
-                        if (!acc[key]) acc[key] = { ...o, count: 0, indices: [] };
+                        if (!acc[key]) acc[key] = { ...o, count: 0, orderIds: [] };
                         acc[key].count += 1;
-                        acc[key].indices.push(idx);
+                        acc[key].orderIds.push(o.order_id);
                         return acc;
                     }, {});
 
@@ -538,7 +547,7 @@ window.addEventListener('error', function(e){
                     let html = `
                         <div class="card-top">
                             <div class="table-num"><span class="latin-no">No.</span>${id}번 테이블${pill}</div>
-                            <div class="table-time">${diffMins}m</div>
+                            <div class="table-time">${formatDuration(diffMins)}</div>
                         </div>
                         <div class="bill">
                             <span class="bill-label">${isAllPaid ? 'Settled' : 'Remaining'}</span>
@@ -548,7 +557,7 @@ window.addEventListener('error', function(e){
 
                     Object.values(groupedOrders).forEach(group => {
                         const isDone = group.status === '서빙 완료';
-                        const idxList = JSON.stringify(group.indices);
+                        const idList = JSON.stringify(group.orderIds);
                         html += `
                             <div class="order-row ${isDone?'done':''}">
                                 <div>
@@ -556,13 +565,13 @@ window.addEventListener('error', function(e){
                                     <span class="order-count">× ${group.count}</span>
                                 </div>
                                 <div class="btn-group">
-                                    <button class="mini-btn pay ${group.is_paid?'is-paid':''}" onclick='batchProcess("item_pay", "${id}", ${idxList})'>
+                                    <button class="mini-btn pay ${group.is_paid?'is-paid':''}" onclick='batchProcess("item_pay", "${id}", ${idList})'>
                                         ${group.is_paid?'완료':'입금'}
                                     </button>
-                                    <button class="mini-btn serve ${isDone?'is-done':''}" onclick='batchProcess("serve", "${id}", ${idxList})'>
+                                    <button class="mini-btn serve ${isDone?'is-done':''}" onclick='batchProcess("serve", "${id}", ${idList})'>
                                         ${isDone?'취소':'서빙'}
                                     </button>
-                                    <button class="mini-btn del" onclick='batchProcess("cancel", "${id}", ${idxList})'>×</button>
+                                    <button class="mini-btn del" onclick='batchProcess("cancel", "${id}", ${idList})'>×</button>
                                 </div>
                             </div>`;
                     });
@@ -587,20 +596,19 @@ window.addEventListener('error', function(e){
             }).then(r => r.json()).then(res => { if(res.status === 'success') refresh(); });
         }
 
-        async function batchProcess(type, tableId, indices) {
+        async function batchProcess(type, tableId, orderIds) {
             let apiPath = '';
             if (type === 'item_pay') apiPath = '/api/item_pay';
             else if (type === 'serve') apiPath = '/api/serve';
             else if (type === 'cancel') {
                 if(!confirm("선택한 항목을 모두 삭제하시겠습니까?")) return;
                 apiPath = '/api/cancel_order';
-                indices.sort((a,b) => b-a);
             }
-            for (const idx of indices) {
+            for (const orderId of orderIds) {
                 await fetch(apiPath, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ table_id: tableId, order_idx: idx })
+                    body: JSON.stringify({ table_id: tableId, order_id: orderId })
                 });
             }
             refresh();
