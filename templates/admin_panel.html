@@ -713,7 +713,14 @@ window.addEventListener('error', function(e){
                         </div>
                         <div class="order-list">`;
 
-                    Object.values(groupedOrders).forEach(group => {
+                    Object.values(groupedOrders)
+                        .sort((a, b) => {
+                            const doneA = a.status === '서빙 완료';
+                            const doneB = b.status === '서빙 완료';
+                            if (doneA !== doneB) return doneA ? 1 : -1;
+                            return a.minOrderId - b.minOrderId;
+                        })
+                        .forEach(group => {
                         const isDone = group.status === '서빙 완료';
                         const idList = JSON.stringify(group.orderIds);
                         html += `
