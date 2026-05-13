@@ -61,6 +61,8 @@ def place_order():
     items = req.get('items', [])
     if not isinstance(items, list) or not items:
         return _bad("주문 항목이 없습니다.")
+    if any(not isinstance(item, str) or not item.strip() for item in items):
+        return _bad("주문 항목 형식이 올바르지 않습니다.")
     try:
         place_order_record(table_id, items)
         return jsonify({"status": "success"})
