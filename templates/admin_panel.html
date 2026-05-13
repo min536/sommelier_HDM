@@ -236,13 +236,11 @@
             display: inline-block;
             font-family: 'Cormorant Garamond', serif;
             font-style: italic;
-            background: var(--wine);
-            color: var(--paper);
-            padding: 4px 12px;
-            font-size: 21px;
+            color: var(--wine);
+            padding: 0;
+            font-size: 29px;
             letter-spacing: 0.05em;
             margin-left: 8px;
-            border-radius: 999px;
             vertical-align: middle;
         }
         .order-row > div:first-child { min-width: 0; flex: 1; }
@@ -250,13 +248,13 @@
         .mini-btn {
             font-family: 'Pretendard', sans-serif;
             white-space: nowrap;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             border: 1px solid var(--rule-strong);
             background: var(--paper);
             color: var(--ink);
-            padding: 6px 9px;
-            min-height: 44px;
+            padding: 4px 6px;
+            min-height: 31px;
             cursor: pointer;
             letter-spacing: 0.02em;
             transition: all 0.15s ease;
@@ -266,7 +264,7 @@
         .mini-btn.pay.is-paid { background: var(--success); color: white; border-color: var(--success); }
         .mini-btn.serve { color: var(--ink); }
         .mini-btn.serve.is-done { color: var(--muted); }
-        .mini-btn.del { color: var(--muted); padding: 6px 8px; min-width: 38px; }
+        .mini-btn.del { color: var(--muted); padding: 4px 6px; min-width: 31px; }
         .mini-btn.del:hover { color: var(--alert); border-color: var(--alert); }
 
         .card-foot { padding: 0 20px 18px; margin-top: auto; }
@@ -396,11 +394,11 @@
             .order-list { padding: 4px 16px 12px; }
             .order-row { font-size: 13.5px; gap: 10px; }
             .order-name { font-size: 14px; }
-            .order-count { padding: 4px 11px; font-size: 20px; }
+            .order-count { padding: 0; font-size: 28px; }
             .card-foot { padding: 0 16px 16px; }
             .clear-btn { padding: 14px 12px; font-size: 12.5px; min-height: 48px; }
-            .mini-btn { padding: 7px 9px; font-size: 11px; min-height: 44px; }
-            .mini-btn.del { padding: 7px 8px; min-width: 38px; }
+            .mini-btn { padding: 5px 7px; font-size: 10px; min-height: 31px; }
+            .mini-btn.del { padding: 5px 6px; min-width: 31px; }
 
             /* Menu management: switch from table to stacked cards on mobile */
             .menu-table thead { display: none; }
@@ -449,7 +447,7 @@
             }
             .btn-group { justify-content: flex-end; }
             .mini-btn { flex: 1; max-width: 90px; text-align: center; }
-            .mini-btn.del { flex: 0 0 38px; max-width: 38px; }
+            .mini-btn.del { flex: 0 0 31px; max-width: 31px; }
         }
     </style>
 </head>
