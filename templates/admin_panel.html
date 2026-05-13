@@ -136,11 +136,24 @@
         }
         .section-rule { flex: 1; height: 1px; background: var(--rule); }
         .section-meta { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; color: var(--muted); }
+        .jump-input {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 11px;
+            border: 1px solid var(--rule-strong);
+            background: var(--paper);
+            color: var(--ink);
+            padding: 3px 7px;
+            width: 72px;
+            text-align: center;
+        }
+        .jump-input::-webkit-inner-spin-button,
+        .jump-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+        .jump-input[type=number] { -moz-appearance: textfield; }
 
         /* ───── TABLE CARDS ───── */
         #display {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 18px;
         }
         .card {
@@ -241,6 +254,16 @@
             font-size: 29px;
             letter-spacing: 0.05em;
             margin-left: 8px;
+            vertical-align: middle;
+        }
+        .order-seq {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 11px;
+            color: var(--muted);
+            margin-right: 8px;
+            white-space: nowrap;
+            letter-spacing: 0.05em;
             vertical-align: middle;
         }
         .order-row > div:first-child { min-width: 0; flex: 1; }
@@ -470,7 +493,7 @@ window.addEventListener('error', function(e){
             <div class="h-kpis">
                 <div class="kpi">
                     <div class="kpi-label">Cumulative Revenue</div>
-                    <div class="kpi-val"><span id="total-rev">0</span><span class="krw">KRW</span></div>
+                    <div class="kpi-val"><span id="total-rev">0</span><span class="krw">원</span></div>
                 </div>
             </div>
         </div>
@@ -481,6 +504,7 @@ window.addEventListener('error', function(e){
         <span class="section-title">테이블 실시간 현황</span>
         <span class="section-rule"></span>
         <span class="section-meta">Live · 5s</span>
+        <input type="number" class="jump-input" min="1" placeholder="# 이동" title="테이블 번호로 이동" oninput="jumpToTable(this.value)">
     </div>
     <div id="display"></div>
 
@@ -545,7 +569,12 @@ window.addEventListener('error', function(e){
 
                     const groupedOrders = info.orders.reduce((acc, o) => {
                         const key = `${o.menu_name}_${o.status}_${o.is_paid}`;
-                        if (!acc[key]) acc[key] = { ...o, count: 0, orderIds: [] };
+                        if (!acc[key]) {
+                            acc[key] = { ...o, count: 0, orderIds: [], minOrderId: o.order_id, minDisplayTime: o.time };
+                        } else {
+                            acc[key].minOrderId = Math.min(acc[key].minOrderId, o.order_id);
+                            acc[key].minDisplayTime = o.time < acc[key].minDisplayTime ? o.time : acc[key].minDisplayTime;
+                        }
                         acc[key].count += 1;
                         acc[key].orderIds.push(o.order_id);
                         return acc;
@@ -553,6 +582,7 @@ window.addEventListener('error', function(e){
 
                     const card = document.createElement('div');
                     card.className = `card ${isAllPaid ? 'all-paid' : ''} ${isLongStay ? 'long-stay' : ''}`;
+                    card.dataset.tableId = id;
 
                     let pill = '';
                     if (isLongStay) pill = '<span class="pill pill-stay">Long stay</span>';
@@ -566,7 +596,7 @@ window.addEventListener('error', function(e){
                         </div>
                         <div class="bill">
                             <span class="bill-label">${isAllPaid ? 'Settled' : 'Remaining'}</span>
-                            <span class="bill-amt">${info.remaining_bill.toLocaleString()}<span class="krw">KRW</span></span>
+                            <span class="bill-amt">${info.remaining_bill.toLocaleString()}<span class="krw">원</span></span>
                         </div>
                         <div class="order-list">`;
 
@@ -576,6 +606,7 @@ window.addEventListener('error', function(e){
                         html += `
                             <div class="order-row ${isDone?'done':''}">
                                 <div>
+                                    <span class="order-seq">#${group.minOrderId} · ${group.minDisplayTime}</span>
                                     <span class="order-name">${group.menu_name}</span>
                                     <span class="order-count">× ${group.count}</span>
                                 </div>
@@ -599,6 +630,11 @@ window.addEventListener('error', function(e){
                     container.appendChild(card);
                 });
             }).catch(()=>{});
+        }
+
+        function jumpToTable(val) {
+            const card = document.querySelector(`#display [data-table-id="${String(val).trim()}"]`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function updateMenu(id) {

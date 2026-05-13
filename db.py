@@ -300,9 +300,6 @@ def get_dashboard_data() -> dict[str, object]:
 
 def get_sales_export_data() -> dict[str, object]:
     with connection() as conn:
-        metrics = conn.execute(
-            "SELECT cumulative_revenue FROM app_metrics WHERE id = 1"
-        ).fetchone() or {"cumulative_revenue": 0}
         rows = conn.execute(
             """
             SELECT
@@ -324,6 +321,15 @@ def get_sales_export_data() -> dict[str, object]:
             ORDER BY revenue DESC, menu_name
             """
         ).fetchall()
+        agg = conn.execute(
+            """
+            SELECT
+                COALESCE(SUM(price), 0) AS ledger_revenue,
+                COALESCE(SUM(CASE WHEN is_paid = 0 THEN price ELSE 0 END), 0) AS unpaid_amount
+            FROM order_ledger
+            WHERE final_state <> 'cancelled'
+            """
+        ).fetchone()
 
     orders = [
         {
@@ -333,7 +339,6 @@ def get_sales_export_data() -> dict[str, object]:
             "price": row["price"],
             "status": row["status"],
             "is_paid": bool(row["is_paid"]),
-            "display_time": row["display_time"],
             "created_at": row["created_at"],
             "final_state": row["final_state"],
             "cleared_at": row["cleared_at"],
@@ -341,19 +346,22 @@ def get_sales_export_data() -> dict[str, object]:
         }
         for row in rows
     ]
+    cancelled_count = sum(1 for o in orders if o["final_state"] == "cancelled")
+    unpaid_count = sum(
+        1 for o in orders if o["final_state"] != "cancelled" and not o["is_paid"]
+    )
     return {
-        "cumulative_revenue": metrics["cumulative_revenue"],
-        "order_count": len(orders),
-        "cancelled_count": sum(1 for row in orders if row["final_state"] == "cancelled"),
-        "unpaid_count": sum(
-            1 for row in orders
-            if row["final_state"] != "cancelled" and not row["is_paid"]
-        ),
+        "ledger_revenue": agg["ledger_revenue"],
+        "unpaid_amount": agg["unpaid_amount"],
+        "order_count": len(orders) - cancelled_count,
+        "cancelled_count": cancelled_count,
+        "unpaid_count": unpaid_count,
         "menu_sales": [
             {
                 "menu_name": row["menu_name"],
                 "quantity": row["quantity"],
                 "revenue": row["revenue"],
+                "avg_price": round(row["revenue"] / row["quantity"]) if row["quantity"] else 0,
             }
             for row in menu_rows
         ],

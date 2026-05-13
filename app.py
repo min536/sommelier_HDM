@@ -81,26 +81,26 @@ def export_sales():
     summary_sheet = workbook.active
     summary_sheet.title = "Summary"
     summary_sheet.append(["항목", "값"])
-    summary_sheet.append(["누적 매출", export_data["cumulative_revenue"]])
-    summary_sheet.append(["판매 건수", export_data["order_count"]])
+    summary_sheet.append(["누적 매출 (원장 합산)", export_data["ledger_revenue"]])
+    summary_sheet.append(["유효 판매 건수", export_data["order_count"]])
     summary_sheet.append(["취소 건수", export_data["cancelled_count"]])
     summary_sheet.append(["미입금 건수", export_data["unpaid_count"]])
+    summary_sheet.append(["미입금 금액", export_data["unpaid_amount"]])
 
     item_sheet = workbook.create_sheet("Menu Sales")
-    item_sheet.append(["메뉴명", "판매 수량", "매출 합계"])
+    item_sheet.append(["메뉴명", "판매 수량", "매출 합계", "평균 판매가"])
     for row in export_data["menu_sales"]:
-        item_sheet.append([row["menu_name"], row["quantity"], row["revenue"]])
+        item_sheet.append([row["menu_name"], row["quantity"], row["revenue"], row["avg_price"]])
 
     order_sheet = workbook.create_sheet("Order Ledger")
     order_sheet.append([
         "주문 ID",
+        "주문 시각",
         "테이블",
         "메뉴명",
-        "가격",
+        "판매가",
         "서빙 상태",
         "입금 여부",
-        "주문 시각",
-        "표시 시각",
         "최종 상태",
         "정리 시각",
         "취소 시각",
@@ -108,13 +108,12 @@ def export_sales():
     for row in export_data["orders"]:
         order_sheet.append([
             row["ledger_id"],
+            row["created_at"],
             row["table_id"],
             row["menu_name"],
             row["price"],
             row["status"],
             "입금" if row["is_paid"] else "미입금",
-            row["created_at"],
-            row["display_time"],
             row["final_state"],
             row["cleared_at"] or "",
             row["cancelled_at"] or "",
