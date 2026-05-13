@@ -1,6 +1,9 @@
+import functools
+import hmac
+import os
 from io import BytesIO
 
-from flask import Flask, jsonify, redirect, render_template, request, send_file, url_for
+from flask import Flask, jsonify, redirect, render_template, request, send_file, session, url_for
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
@@ -20,12 +23,32 @@ from db import (
 )
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'sommelier-dev-fallback-key-change-in-prod')
 init_db()
+
+_ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'tedchang')
+_ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'changsikhi')
+
+
+def _check_credentials(username: str, password: str) -> bool:
+    user_ok = hmac.compare_digest(username.encode(), _ADMIN_USERNAME.encode())
+    pass_ok = hmac.compare_digest(password.encode(), _ADMIN_PASSWORD.encode())
+    return user_ok and pass_ok
+
+
+def _admin_required(f):
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            if request.path.startswith('/api/'):
+                return jsonify({"status": "error", "message": "인증이 필요합니다."}), 401
+            return redirect(url_for('login', next=request.path))
+        return f(*args, **kwargs)
+    return decorated
 
 
 # ── request validation helpers ──────────────────────────────────────────
 def _bad(msg: str):
-    """Return a JSON 400 error response."""
     return jsonify({"status": "error", "message": msg}), 400
 
 
@@ -46,7 +69,28 @@ def guest_menu():
 def server_page(table_id):
     return render_template('server_order.html', menus=get_menu_items(), table_id=table_id)
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if session.get('admin_logged_in'):
+        return redirect(url_for('admin_panel'))
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
+        if _check_credentials(username, password):
+            session['admin_logged_in'] = True
+            next_url = request.args.get('next', '')
+            return redirect(next_url if next_url.startswith('/') else url_for('admin_panel'))
+        error = '아이디 또는 비밀번호가 올바르지 않습니다.'
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('login'))
+
 @app.route('/admin')
+@_admin_required
 def admin_panel():
     return render_template('admin_panel.html', data=get_dashboard_data())
 
@@ -70,10 +114,12 @@ def place_order():
         return jsonify({"status": "error", "message": str(exc)}), 400
 
 @app.route('/api/orders', methods=['GET'])
+@_admin_required
 def get_admin_data():
     return jsonify(get_dashboard_data())
 
 @app.route('/api/admin/export_sales', methods=['GET'])
+@_admin_required
 def export_sales():
     export_data = get_sales_export_data()
     workbook = Workbook()
@@ -145,6 +191,7 @@ def get_table_status(table_id):
     return jsonify(get_table_status_record(str(table_id)))
 
 @app.route('/api/admin/update_menu', methods=['POST'])
+@_admin_required
 def admin_update_menu():
     req = request.get_json(silent=True)
     if req is None:
@@ -165,6 +212,7 @@ def admin_update_menu():
     return jsonify({"status": "success"})
 
 @app.route('/api/item_pay', methods=['POST'])
+@_admin_required
 def toggle_item_pay():
     req = request.get_json(silent=True)
     if req is None:
@@ -210,6 +258,7 @@ def cancel_order():
     return jsonify({"status": "fail"}), 400
 
 @app.route('/api/clear', methods=['POST'])
+@_admin_required
 def clear_table():
     req = request.get_json(silent=True)
     if req is None:

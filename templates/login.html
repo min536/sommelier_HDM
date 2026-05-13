@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소믈리에 주점 | 관리자 로그인</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --wine: #862633;
+            --wine-deep: #5C1A22;
+            --gold: #B8924A;
+            --cream: #FAF6F0;
+            --paper: #FFFCF7;
+            --ink: #1A1A1A;
+            --muted: #7A7068;
+            --rule: #E8DFD0;
+            --rule-strong: #D6CAB3;
+            --alert: #C53030;
+            --alert-soft: #FCEAEA;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            background: var(--cream);
+            margin: 0;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+        .card {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-top: 3px solid var(--wine);
+            padding: 48px 44px 44px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .brand-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 12px;
+            letter-spacing: 0.28em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .brand {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 900;
+            font-size: 22px;
+            color: var(--wine-deep);
+            letter-spacing: 0.02em;
+            margin-bottom: 32px;
+        }
+        .divider {
+            height: 1px;
+            background: var(--rule);
+            margin-bottom: 32px;
+        }
+        label {
+            display: block;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 11px;
+            letter-spacing: 0.22em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            display: block;
+            width: 100%;
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            font-size: 15px;
+            color: var(--ink);
+            background: var(--cream);
+            border: 1px solid var(--rule-strong);
+            padding: 11px 13px;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: var(--wine);
+        }
+        .error {
+            background: var(--alert-soft);
+            border: 1px solid var(--alert);
+            color: var(--alert);
+            font-size: 13px;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        button[type="submit"] {
+            display: block;
+            width: 100%;
+            background: var(--wine);
+            color: #fff;
+            border: none;
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-top: 4px;
+        }
+        button[type="submit"]:hover {
+            background: var(--wine-deep);
+        }
+        .footer-note {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.12em;
+            text-align: center;
+            margin-top: 28px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="brand-label">Sommelier · Operations</div>
+        <div class="brand">관리자 로그인</div>
+        <div class="divider"></div>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('login', next=request.args.get('next', '')) }}">
+            <label for="username">아이디</label>
+            <input type="text" id="username" name="username" autocomplete="username" autofocus required>
+
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" name="password" autocomplete="current-password" required>
+
+            <button type="submit">로그인</button>
+        </form>
+
+        <div class="footer-note">소믈리에 주점 운영팀 전용</div>
+    </div>
+</body>
+</html>

@@ -86,6 +86,19 @@
             cursor: pointer;
         }
         .export-btn:hover { background: var(--wine-deep); }
+        .logout-btn {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 12px;
+            letter-spacing: 0.18em;
+            color: var(--muted);
+            text-decoration: none;
+            border: 1px solid var(--rule-strong);
+            padding: 6px 14px;
+            white-space: nowrap;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .logout-btn:hover { color: var(--wine); border-color: var(--wine); }
         .kpi {
             text-align: right;
             padding-left: 28px;
@@ -496,6 +509,7 @@ window.addEventListener('error', function(e){
                     <div class="kpi-val"><span id="total-rev">0</span><span class="krw">원</span></div>
                 </div>
             </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn">로그아웃</a>
         </div>
     </div>
 
