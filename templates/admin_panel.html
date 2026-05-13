@@ -200,6 +200,7 @@
         }
         .menu-group-title:not(:first-child) {
             border-top: 1px solid var(--rule);
+            margin-top: 18px;
         }
         .menu-card-grid {
             display: grid;
@@ -221,7 +222,8 @@
             line-height: 1.4;
         }
         .menu-card-fields {
-            display: flex;
+            display: grid;
+            grid-template-columns: max-content minmax(64px, 1fr) max-content minmax(64px, 1fr);
             align-items: center;
             gap: 8px;
         }
@@ -235,10 +237,13 @@
             flex-shrink: 0;
         }
         .menu-card-fields .input-sm {
-            width: 80px;
+            width: 100%;
+            min-width: 0;
         }
         .menu-card-apply {
-            margin-left: auto;
+            grid-column: 1 / -1;
+            justify-self: end;
+            margin-left: 0;
         }
 
         /* ───── TABLE CARDS ───── */
@@ -451,6 +456,19 @@
             text-transform: uppercase;
         }
 
+        /* ───── REFRESH STATUS ───── */
+        .refresh-status {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 0.12em;
+            text-align: right;
+            margin: -10px 0 10px;
+            min-height: 16px;
+        }
+        .refresh-status.error { color: var(--alert); }
+
         /* ───── MOBILE (placed last so it actually overrides) ───── */
         @media (max-width: 720px) {
             body { padding: 14px; }
@@ -494,8 +512,7 @@
             /* Menu management: single column on mobile */
             .menu-card-grid { grid-template-columns: 1fr; }
             .menu-card { border-right: none; }
-            .menu-card-fields { flex-wrap: wrap; }
-            .menu-card-fields .input-sm { width: 70px; }
+            .menu-card-fields .input-sm { width: 100%; }
             .sort-toggle { margin-left: 0; }
             .sort-btn { font-size: 10px; padding: 3px 8px; }
             .credit { margin-top: 36px; font-size: 11px; letter-spacing: 0.18em; }
@@ -514,8 +531,9 @@
                 gap: 8px;
             }
             .order-row > div:first-child {
-                display: flex; justify-content: space-between; align-items: center;
+                display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
             }
+            .order-seq { flex-basis: 100%; }
             .btn-group { justify-content: flex-end; }
             .mini-btn { flex: 1; max-width: 90px; text-align: center; }
             .mini-btn.del { flex: 0 0 31px; max-width: 31px; }
@@ -559,6 +577,7 @@ window.addEventListener('error', function(e){
         </div>
         <input type="number" class="jump-input" min="1" placeholder="# 이동" title="테이블 번호로 이동" oninput="jumpToTable(this.value)">
     </div>
+    <div class="refresh-status" id="refresh-status"></div>
     <div id="display"></div>
 
     <div class="section">
@@ -588,6 +607,10 @@ window.addEventListener('error', function(e){
         const CATEGORY_GROUP = { liquor: 'WINE', food: 'FOOD' };
         function menuGroup(cat) { return CATEGORY_GROUP[cat] || 'ETC'; }
 
+        function escapeHtml(s) {
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
         function formatDuration(mins) {
             if (mins < 60) return `${mins}분`;
             const h = Math.floor(mins / 60);
@@ -597,6 +620,9 @@ window.addEventListener('error', function(e){
 
         function refresh() {
             fetch('/api/orders').then(r => r.json()).then(res => {
+                const _rs = document.getElementById('refresh-status');
+                _rs.textContent = '';
+                _rs.className = 'refresh-status';
                 document.getElementById('total-rev').innerText = res.cumulative_revenue.toLocaleString();
 
                 // ── Menu management: grouped card layout ──
@@ -610,7 +636,7 @@ window.addEventListener('error', function(e){
                     groups[g].forEach(m => {
                         menuHtml += `
                             <div class="menu-card">
-                                <div class="menu-card-name">${m.name}</div>
+                                <div class="menu-card-name">${escapeHtml(m.name)}</div>
                                 <div class="menu-card-fields">
                                     <span class="field-label">Price</span>
                                     <input type="number" id="p-${m.id}" class="input-sm" value="${m.price}">
@@ -687,7 +713,7 @@ window.addEventListener('error', function(e){
                             <div class="order-row ${isDone?'done':''}">
                                 <div>
                                     <span class="order-seq">#${group.minOrderId} · ${group.minDisplayTime}</span>
-                                    <span class="order-name">${group.menu_name}</span>
+                                    <span class="order-name">${escapeHtml(group.menu_name)}</span>
                                     <span class="order-count">× ${group.count}</span>
                                 </div>
                                 <div class="btn-group">
@@ -709,7 +735,11 @@ window.addEventListener('error', function(e){
                     card.innerHTML = html;
                     container.appendChild(card);
                 });
-            }).catch(()=>{});
+            }).catch(() => {
+                const _rs = document.getElementById('refresh-status');
+                _rs.textContent = '새로고침 실패 · 연결 상태 확인 필요';
+                _rs.className = 'refresh-status error';
+            });
         }
 
         function jumpToTable(val) {
