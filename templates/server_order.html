@@ -131,13 +131,24 @@
         }
         .status-item > div:first-child { min-width: 0; flex: 1; }
         .status-item:last-child { border-bottom: none; }
-        .si-name { font-weight: 600; font-size: 14px; }
+        .si-name {
+            display: block;
+            font-weight: 700;
+            font-size: 15px;
+            line-height: 1.35;
+        }
+        .si-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
         .si-count {
             font-family: 'Cormorant Garamond', serif;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--wine);
-            font-size: 16px;
-            margin-left: 4px;
+            font-size: 18px;
         }
         .si-state {
             font-family: 'Cormorant Garamond', serif;
@@ -146,8 +157,8 @@
             letter-spacing: 0.15em;
             color: var(--muted);
             text-transform: uppercase;
-            margin-top: 2px;
-            display: block;
+            margin-top: 0;
+            display: inline-block;
         }
         .si-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .mini-btn {
@@ -407,12 +418,12 @@
             flex-shrink: 0;
         }
         .qty-btn {
-            width: 44px;
-            height: 44px;
+            width: 35px;
+            height: 35px;
             border: 1px solid var(--rule-strong);
             background: var(--cream);
             color: var(--wine-deep);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             display: flex;
@@ -424,12 +435,12 @@
         }
         .qty-btn:hover { background: var(--wine); color: var(--paper); border-color: var(--wine); }
         .qty-display {
-            min-width: 32px;
+            min-width: 36px;
             text-align: center;
             font-family: 'Cormorant Garamond', serif;
             font-weight: 700;
             color: var(--wine);
-            font-size: 20px;
+            font-size: 30px;
             line-height: 1;
         }
         .cart-modal-empty {
@@ -468,7 +479,8 @@
             .status-title { font-size: 14px; }
             .status-meta { font-size: 11px; }
             .status-item { padding: 11px 0; gap: 8px; }
-            .si-name { font-size: 13px; }
+            .si-name { font-size: 14px; }
+            .si-count { font-size: 17px; }
             .si-actions { flex-shrink: 0; }
             .mini-btn { white-space: nowrap; min-height: 44px; padding: 8px 12px; font-size: 12.5px; }
 
@@ -735,8 +747,11 @@ window.addEventListener('error', function(e){
             list.innerHTML = Object.values(grouped).map(g => `
                 <div class="status-item">
                     <div>
-                        <span class="si-name">${g.name}</span><span class="si-count">× ${g.count}</span>
-                        <span class="si-state">${g.status}</span>
+                        <span class="si-name">${g.name}</span>
+                        <div class="si-meta">
+                            <span class="si-count">× ${g.count}</span>
+                            <span class="si-state">${g.status}</span>
+                        </div>
                     </div>
                     <div class="si-actions">
                         <button class="mini-btn serve" onclick="toggleServe(${g.orderIds[0]})">처리</button>
