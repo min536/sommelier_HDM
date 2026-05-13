@@ -149,19 +149,6 @@
         }
         .section-rule { flex: 1; height: 1px; background: var(--rule); }
         .section-meta { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; color: var(--muted); }
-        .management-section {
-            background: var(--paper);
-            border: 1px solid var(--rule);
-            border-top: 3px solid var(--gold);
-            padding: 0 22px 22px;
-            margin-top: 52px;
-        }
-        .management-section .section {
-            margin-top: 24px;
-        }
-        .management-section .panel {
-            border-color: var(--rule-strong);
-        }
         .jump-input {
             font-family: 'Pretendard', sans-serif;
             font-size: 11px;
@@ -201,6 +188,13 @@
         .sort-btn:not(.active):hover { color: var(--ink); background: var(--cream); }
 
         /* ───── MENU CARD GRID ───── */
+        .menu-group {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+        }
+        .menu-group:not(:first-child) {
+            margin-top: 22px;
+        }
         .menu-group-title {
             font-family: 'Cormorant Garamond', serif;
             font-style: italic;
@@ -210,10 +204,6 @@
             text-transform: uppercase;
             padding: 16px 20px 10px;
             border-bottom: 1px solid var(--rule);
-        }
-        .menu-group-title:not(:first-child) {
-            border-top: 1px solid var(--rule);
-            margin-top: 18px;
         }
         .menu-card-grid {
             display: grid;
@@ -503,8 +493,6 @@
             }
             .kpi-val { font-size: 24px; }
             .section { margin: 28px 0 14px; }
-            .management-section { padding: 0 14px 18px; margin-top: 36px; }
-            .management-section .section { margin-top: 20px; }
             .section-num { font-size: 18px; }
             .section-title { font-size: 16px; }
             .section-meta { font-size: 11px; }
@@ -595,18 +583,16 @@ window.addEventListener('error', function(e){
     <div class="refresh-status" id="refresh-status"></div>
     <div id="display"></div>
 
-    <div class="management-section">
-        <div class="section">
-            <span class="section-num">02</span>
-            <span class="section-title">메뉴 및 재고 관리</span>
-            <span class="section-rule"></span>
-            <span class="section-meta">Menu &amp; Stock</span>
-        </div>
-        <div class="panel" id="menu-management-panel"></div>
+    <div class="section">
+        <span class="section-num">02</span>
+        <span class="section-title">메뉴 및 재고 관리</span>
+        <span class="section-rule"></span>
+        <span class="section-meta">Menu &amp; Stock</span>
+    </div>
+    <div class="panel" id="menu-management-panel"></div>
 
-        <div class="export-actions">
-            <button class="export-btn" onclick="downloadSales()">판매내역 Excel</button>
-        </div>
+    <div class="export-actions">
+        <button class="export-btn" onclick="downloadSales()">판매내역 Excel</button>
     </div>
 
     <div class="credit">— System designed by 동민 · 창식 —</div>
@@ -654,7 +640,7 @@ window.addEventListener('error', function(e){
                 let menuHtml = '';
                 ['WINE', 'FOOD', 'ETC'].forEach(g => {
                     if (!groups[g].length) return;
-                    menuHtml += `<div class="menu-group-title">${g}</div><div class="menu-card-grid">`;
+                    menuHtml += `<div class="menu-group"><div class="menu-group-title">${g}</div><div class="menu-card-grid">`;
                     groups[g].forEach(m => {
                         menuHtml += `
                             <div class="menu-card">
@@ -668,7 +654,7 @@ window.addEventListener('error', function(e){
                                 </div>
                             </div>`;
                     });
-                    menuHtml += `</div>`;
+                    menuHtml += `</div></div>`;
                 });
                 menuPanel.innerHTML = menuHtml;
 
