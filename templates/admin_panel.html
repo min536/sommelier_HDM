@@ -65,6 +65,22 @@
             letter-spacing: 0.02em;
         }
         .h-kpis { display: flex; gap: 28px; align-items: stretch; }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .export-btn {
+            border: 1px solid var(--wine);
+            background: var(--wine);
+            color: #fff;
+            min-height: 42px;
+            padding: 0 16px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .export-btn:hover { background: var(--wine-deep); }
         .kpi {
             text-align: right;
             padding-left: 28px;
@@ -436,10 +452,13 @@ window.addEventListener('error', function(e){
             <div class="h-brand-label">Sommelier · Operations</div>
             <div class="h-brand">소믈리에 주점 통합 관리</div>
         </div>
-        <div class="h-kpis">
-            <div class="kpi">
-                <div class="kpi-label">Cumulative Revenue</div>
-                <div class="kpi-val"><span id="total-rev">0</span><span class="krw">KRW</span></div>
+        <div class="header-actions">
+            <button class="export-btn" onclick="downloadSales()">판매내역 Excel</button>
+            <div class="h-kpis">
+                <div class="kpi">
+                    <div class="kpi-label">Cumulative Revenue</div>
+                    <div class="kpi-val"><span id="total-rev">0</span><span class="krw">KRW</span></div>
+                </div>
             </div>
         </div>
     </div>
@@ -591,6 +610,10 @@ window.addEventListener('error', function(e){
             if(confirm(id + '번 테이블을 비우시겠습니까?')) {
                 fetch('/api/clear', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({table_id:id})}).then(refresh);
             }
+        }
+
+        function downloadSales() {
+            window.location.href = '/api/admin/export_sales';
         }
 
         setInterval(refresh, 5000);

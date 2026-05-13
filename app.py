@@ -1,9 +1,15 @@
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+from io import BytesIO
+
+from flask import Flask, jsonify, redirect, render_template, request, send_file, url_for
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
+from openpyxl.utils import get_column_letter
 
 from db import (
     cancel_order as cancel_order_record,
     clear_table as clear_table_record,
     get_dashboard_data,
+    get_sales_export_data,
     get_menu_items,
     get_table_status as get_table_status_record,
     init_db,
@@ -46,6 +52,74 @@ def place_order():
 @app.route('/api/orders', methods=['GET'])
 def get_admin_data():
     return jsonify(get_dashboard_data())
+
+@app.route('/api/admin/export_sales', methods=['GET'])
+def export_sales():
+    export_data = get_sales_export_data()
+    workbook = Workbook()
+
+    summary_sheet = workbook.active
+    summary_sheet.title = "Summary"
+    summary_sheet.append(["항목", "값"])
+    summary_sheet.append(["누적 매출", export_data["cumulative_revenue"]])
+    summary_sheet.append(["판매 건수", export_data["order_count"]])
+    summary_sheet.append(["취소 건수", export_data["cancelled_count"]])
+    summary_sheet.append(["미입금 건수", export_data["unpaid_count"]])
+
+    item_sheet = workbook.create_sheet("Menu Sales")
+    item_sheet.append(["메뉴명", "판매 수량", "매출 합계"])
+    for row in export_data["menu_sales"]:
+        item_sheet.append([row["menu_name"], row["quantity"], row["revenue"]])
+
+    order_sheet = workbook.create_sheet("Order Ledger")
+    order_sheet.append([
+        "주문 ID",
+        "테이블",
+        "메뉴명",
+        "가격",
+        "서빙 상태",
+        "입금 여부",
+        "주문 시각",
+        "표시 시각",
+        "최종 상태",
+        "정리 시각",
+        "취소 시각",
+    ])
+    for row in export_data["orders"]:
+        order_sheet.append([
+            row["ledger_id"],
+            row["table_id"],
+            row["menu_name"],
+            row["price"],
+            row["status"],
+            "입금" if row["is_paid"] else "미입금",
+            row["created_at"],
+            row["display_time"],
+            row["final_state"],
+            row["cleared_at"] or "",
+            row["cancelled_at"] or "",
+        ])
+
+    for sheet in workbook.worksheets:
+        header_fill = PatternFill("solid", fgColor="862633")
+        header_font = Font(color="FFFFFF", bold=True)
+        for cell in sheet[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+        sheet.freeze_panes = "A2"
+        for column in sheet.columns:
+            max_length = max(len(str(cell.value or "")) for cell in column)
+            sheet.column_dimensions[get_column_letter(column[0].column)].width = min(max_length + 3, 36)
+
+    buffer = BytesIO()
+    workbook.save(buffer)
+    buffer.seek(0)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="sommelier_sales_ledger.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
 @app.route('/api/table_status/<table_id>', methods=['GET'])
 def get_table_status(table_id):

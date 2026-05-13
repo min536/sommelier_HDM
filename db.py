@@ -94,6 +94,25 @@ def init_db() -> None:
             quantity INTEGER NOT NULL DEFAULT 0
         )
         """,
+        """
+        CREATE TABLE IF NOT EXISTS order_ledger (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_order_id INTEGER UNIQUE,
+            table_id TEXT NOT NULL,
+            menu_item_id INTEGER NULL,
+            menu_name TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            status TEXT NOT NULL,
+            is_paid INTEGER NOT NULL DEFAULT 0,
+            display_time TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            final_state TEXT NOT NULL DEFAULT 'active',
+            cleared_at TEXT NULL,
+            cancelled_at TEXT NULL
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_order_ledger_created_at ON order_ledger(created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_order_ledger_final_state ON order_ledger(final_state)",
     ]
     with connection() as conn:
         conn.execute("PRAGMA journal_mode = WAL")
@@ -124,6 +143,19 @@ def init_db() -> None:
                     for item in INITIAL_MENU
                 ],
             )
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO order_ledger
+            (
+                source_order_id, table_id, menu_item_id, menu_name, price,
+                status, is_paid, display_time, created_at, final_state
+            )
+            SELECT
+                id, table_id, menu_item_id, menu_name, price,
+                status, is_paid, display_time, created_at, 'active'
+            FROM orders
+            """
+        )
         conn.commit()
 
 
@@ -246,6 +278,69 @@ def get_dashboard_data() -> dict[str, object]:
     }
 
 
+def get_sales_export_data() -> dict[str, object]:
+    with connection() as conn:
+        metrics = conn.execute(
+            "SELECT cumulative_revenue FROM app_metrics WHERE id = 1"
+        ).fetchone() or {"cumulative_revenue": 0}
+        rows = conn.execute(
+            """
+            SELECT
+                id, table_id, menu_name, price, status, is_paid,
+                display_time, created_at, final_state, cleared_at, cancelled_at
+            FROM order_ledger
+            ORDER BY created_at, id
+            """
+        ).fetchall()
+        menu_rows = conn.execute(
+            """
+            SELECT
+                menu_name,
+                COUNT(*) AS quantity,
+                COALESCE(SUM(price), 0) AS revenue
+            FROM order_ledger
+            WHERE final_state <> 'cancelled'
+            GROUP BY menu_name
+            ORDER BY revenue DESC, menu_name
+            """
+        ).fetchall()
+
+    orders = [
+        {
+            "ledger_id": row["id"],
+            "table_id": row["table_id"],
+            "menu_name": row["menu_name"],
+            "price": row["price"],
+            "status": row["status"],
+            "is_paid": bool(row["is_paid"]),
+            "display_time": row["display_time"],
+            "created_at": row["created_at"],
+            "final_state": row["final_state"],
+            "cleared_at": row["cleared_at"],
+            "cancelled_at": row["cancelled_at"],
+        }
+        for row in rows
+    ]
+    return {
+        "cumulative_revenue": metrics["cumulative_revenue"],
+        "order_count": len(orders),
+        "cancelled_count": sum(1 for row in orders if row["final_state"] == "cancelled"),
+        "unpaid_count": sum(
+            1 for row in orders
+            if row["final_state"] != "cancelled" and not row["is_paid"]
+        ),
+        "menu_sales": [
+            {
+                "menu_name": row["menu_name"],
+                "quantity": row["quantity"],
+                "revenue": row["revenue"],
+            }
+            for row in menu_rows
+        ],
+        "orders": orders,
+    }
+
+
 def place_order(table_id: str, item_names: list[str]) -> None:
     now = datetime.now()
     now_iso = now.isoformat()
@@ -278,6 +373,26 @@ def place_order(table_id: str, item_names: list[str]) -> None:
                     VALUES (?, ?, ?, ?, '대기 중', 0, ?, ?)
                     """,
                     (table_id, item["id"], name, item["price"], now.strftime("%H:%M"), now_iso),
+                )
+                source_order_id = conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+                conn.execute(
+                    """
+                    INSERT INTO order_ledger
+                    (
+                        source_order_id, table_id, menu_item_id, menu_name, price,
+                        status, is_paid, display_time, created_at, final_state
+                    )
+                    VALUES (?, ?, ?, ?, ?, '대기 중', 0, ?, ?, 'active')
+                    """,
+                    (
+                        source_order_id,
+                        table_id,
+                        item["id"],
+                        name,
+                        item["price"],
+                        now.strftime("%H:%M"),
+                        now_iso,
+                    ),
                 )
                 conn.execute(
                     "UPDATE app_metrics SET cumulative_revenue = cumulative_revenue + ? WHERE id = 1",
@@ -329,6 +444,14 @@ def toggle_item_pay(table_id: str, order_idx: int) -> bool:
             "UPDATE orders SET is_paid = CASE WHEN is_paid = 1 THEN 0 ELSE 1 END WHERE id = ?",
             (order_id,),
         )
+        conn.execute(
+            """
+            UPDATE order_ledger
+            SET is_paid = CASE WHEN is_paid = 1 THEN 0 ELSE 1 END
+            WHERE source_order_id = ?
+            """,
+            (order_id,),
+        )
         conn.commit()
         return True
 
@@ -343,6 +466,14 @@ def toggle_serve(table_id: str, order_idx: int) -> bool:
             UPDATE orders
             SET status = CASE WHEN status = '대기 중' THEN '서빙 완료' ELSE '대기 중' END
             WHERE id = ?
+            """,
+            (order_id,),
+        )
+        conn.execute(
+            """
+            UPDATE order_ledger
+            SET status = CASE WHEN status = '대기 중' THEN '서빙 완료' ELSE '대기 중' END
+            WHERE source_order_id = ?
             """,
             (order_id,),
         )
@@ -365,6 +496,14 @@ def cancel_order(table_id: str, order_idx: int) -> bool:
             if not item:
                 conn.rollback()
                 return False
+            conn.execute(
+                """
+                UPDATE order_ledger
+                SET final_state = 'cancelled', cancelled_at = ?, source_order_id = NULL
+                WHERE source_order_id = ?
+                """,
+                (datetime.now().isoformat(), order_id),
+            )
             conn.execute("DELETE FROM orders WHERE id = ?", (order_id,))
             conn.execute(
                 "UPDATE app_metrics SET cumulative_revenue = cumulative_revenue - ? WHERE id = 1",
@@ -387,8 +526,27 @@ def cancel_order(table_id: str, order_idx: int) -> bool:
 
 def clear_table(table_id: str) -> bool:
     with connection() as conn:
-        cur = conn.execute("DELETE FROM dining_tables WHERE table_id = ?", (table_id,))
-        changed = cur.rowcount > 0
-        conn.commit()
-        return changed
-
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            table = conn.execute(
+                "SELECT table_id FROM dining_tables WHERE table_id = ?",
+                (table_id,),
+            ).fetchone()
+            if not table:
+                conn.rollback()
+                return False
+            now_iso = datetime.now().isoformat()
+            conn.execute(
+                """
+                UPDATE order_ledger
+                SET final_state = 'cleared', cleared_at = ?, source_order_id = NULL
+                WHERE table_id = ? AND final_state = 'active'
+                """,
+                (now_iso, table_id),
+            )
+            conn.execute("DELETE FROM dining_tables WHERE table_id = ?", (table_id,))
+            conn.commit()
+            return True
+        except Exception:
+            conn.rollback()
+            raise
