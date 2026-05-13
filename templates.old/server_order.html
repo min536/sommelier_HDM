@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소믈리에 주점 | 서빙 패널</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --wine: #862633;
+            --wine-deep: #5C1A22;
+            --wine-darker: #3A1014;
+            --gold: #B8924A;
+            --gold-soft: #D4B574;
+            --cream: #FAF6F0;
+            --paper: #FFFCF7;
+            --ink: #1A1A1A;
+            --muted: #7A7068;
+            --rule: #E8DFD0;
+            --rule-strong: #D6CAB3;
+            --success: #2D6A4F;
+            --alert: #C53030;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            background: var(--cream);
+            margin: 0;
+            padding: 0 0 140px;
+            color: var(--ink);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container { max-width: 540px; margin: 0 auto; padding: 0 18px; }
+        @media (max-width: 380px) {
+            .container { padding: 0 14px; }
+            .staff-header { padding: 30px 18px 22px; }
+            .staff-title { font-size: 20px; }
+            .cart-bar { left: 14px; right: 14px; bottom: 14px; padding: 14px 18px; }
+            .grid { gap: 12px; }
+        }
+
+        /* ───── STAFF HEADER (deep wine) ───── */
+        .staff-header {
+            background: var(--wine-darker);
+            color: var(--paper);
+            padding: 38px 24px 28px;
+            position: relative;
+            overflow: hidden;
+        }
+        .staff-header::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--gold) 0%, var(--gold-soft) 50%, var(--gold) 100%);
+        }
+        .staff-mode {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 12px;
+            letter-spacing: 0.3em;
+            color: var(--gold-soft);
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .staff-title {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: 0.04em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Table selector */
+        .table-selector {
+            background: rgba(255,252,247,0.06);
+            border: 1px solid rgba(212,181,116,0.35);
+            padding: 14px 18px;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            max-width: 320px; margin: 0 auto;
+        }
+        .ts-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            color: var(--gold-soft);
+            text-transform: uppercase;
+        }
+        .table-input {
+            width: 72px;
+            background: var(--paper);
+            border: none;
+            padding: 8px 6px;
+            text-align: center;
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--wine-deep);
+            letter-spacing: 0.02em;
+        }
+        .ts-suffix {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 14px;
+            color: var(--paper);
+        }
+
+        /* ───── STATUS ───── */
+        .status-box {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            margin-top: 22px;
+            padding: 20px 22px;
+            margin-bottom: 28px;
+        }
+        .status-head {
+            display: flex; justify-content: space-between; align-items: baseline;
+            padding-bottom: 12px; margin-bottom: 8px;
+            border-bottom: 1px solid var(--rule);
+        }
+        .status-title { font-family: 'Noto Serif KR', serif; font-weight: 700; font-size: 15px; color: var(--wine-deep); }
+        .status-meta { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; color: var(--muted); }
+        .empty-state {
+            text-align: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            color: var(--muted);
+            padding: 14px 0;
+            font-size: 14px;
+        }
+        .status-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dotted var(--rule);
+        }
+        .status-item:last-child { border-bottom: none; }
+        .si-name { font-weight: 600; font-size: 14px; }
+        .si-count {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            color: var(--wine);
+            font-size: 16px;
+            margin-left: 4px;
+        }
+        .si-state {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 11.5px;
+            letter-spacing: 0.15em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-top: 2px;
+            display: block;
+        }
+        .si-actions { display: flex; gap: 6px; }
+        .mini-btn {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 11.5px;
+            font-weight: 600;
+            border: 1px solid var(--rule-strong);
+            background: var(--paper);
+            color: var(--ink);
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .mini-btn.serve { color: var(--wine); border-color: var(--wine); }
+        .mini-btn.serve:hover { background: var(--wine); color: var(--paper); }
+        .mini-btn.cancel { color: var(--muted); }
+        .mini-btn.cancel:hover { color: var(--alert); border-color: var(--alert); }
+
+        /* ───── CATEGORY ───── */
+        .cat {
+            display: flex; align-items: baseline; gap: 14px;
+            margin: 40px 0 16px;
+        }
+        .cat-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 20px;
+            color: var(--gold);
+        }
+        .cat-name {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--ink);
+            letter-spacing: 0.02em;
+        }
+        .cat-line { flex: 1; height: 1px; background: var(--rule); }
+        .cat-sub {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 13px;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+        }
+
+        /* ───── MENU GRID ───── */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+        .card {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            position: relative;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .card-img-wrap {
+            background: linear-gradient(180deg, #F5EFE3 0%, #EDE4D2 100%);
+            aspect-ratio: 4 / 3;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .card-img-wrap img { width: 86%; height: 86%; object-fit: contain; }
+        .card-body { padding: 12px 12px 0; text-align: center; }
+        .card-name {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 600;
+            font-size: 13.5px;
+            margin-bottom: 6px;
+            color: var(--ink);
+        }
+        .card-rule { width: 20px; height: 1px; background: var(--gold); margin: 0 auto 6px; }
+        .card-price {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--wine-deep);
+            margin-bottom: 12px;
+        }
+        .card-price .krw { font-family: 'Pretendard'; font-size: 10px; color: var(--muted); margin-left: 2px; font-weight: 500; letter-spacing: 0.1em; }
+        .add-btn {
+            font-family: 'Noto Serif KR', serif;
+            background: var(--wine-darker);
+            color: var(--paper);
+            border: none;
+            width: 100%;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            letter-spacing: 0.08em;
+            margin-top: auto;
+            transition: background 0.15s;
+        }
+        .add-btn:hover { background: var(--wine); }
+        .add-btn:disabled { background: #C9C0B0; cursor: not-allowed; color: var(--paper); }
+
+        .sold-overlay {
+            position: absolute; top: 0; left: 0; right: 0;
+            aspect-ratio: 4 / 3;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(26,26,26,0.55);
+            color: var(--paper);
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 18px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            z-index: 5;
+        }
+
+        /* ───── CART BAR ───── */
+        .cart-bar {
+            position: fixed;
+            bottom: 20px; left: 20px; right: 20px;
+            max-width: 500px; margin: 0 auto;
+            background: var(--wine-darker);
+            color: var(--paper);
+            padding: 16px 22px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 14px 36px rgba(58,16,20,0.35);
+            border: 1px solid rgba(212,181,116,0.3);
+            z-index: 100;
+        }
+        .cart-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            color: var(--gold-soft);
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .cart-count {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .view-cart-btn {
+            font-family: 'Noto Serif KR', serif;
+            background: var(--gold);
+            color: var(--wine-darker);
+            border: none;
+            padding: 12px 22px;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .view-cart-btn:hover { background: var(--gold-soft); }
+
+        /* ───── MODAL ───── */
+        #cart-modal {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(26,16,18,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--paper);
+            width: 88%; max-width: 420px;
+            margin: 12vh auto;
+            border: 1px solid var(--rule);
+            border-top: 3px solid var(--wine);
+            padding: 28px;
+        }
+        .modal-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 12px;
+            letter-spacing: 0.25em;
+            color: var(--gold);
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .modal-title {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 700;
+            font-size: 19px;
+            color: var(--wine-deep);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .cart-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dotted var(--rule);
+        }
+        .cart-row:last-child { border-bottom: none; }
+        .cart-row-name { font-family: 'Noto Serif KR', serif; font-weight: 600; font-size: 14px; }
+        .cart-row-count {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            background: var(--cream);
+            border: 1px solid var(--rule);
+            color: var(--wine);
+            padding: 2px 10px;
+            font-size: 14px;
+        }
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            margin-top: 22px;
+        }
+        .btn-close {
+            font-family: 'Noto Serif KR', serif;
+            background: var(--cream);
+            color: var(--muted);
+            border: 1px solid var(--rule);
+            padding: 13px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+        }
+        .btn-submit {
+            font-family: 'Noto Serif KR', serif;
+            background: var(--wine);
+            color: var(--paper);
+            border: none;
+            padding: 13px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.1em;
+            transition: background 0.15s;
+        }
+        .btn-submit:hover { background: var(--wine-deep); }
+
+        /* footer credit */
+        .credit {
+            text-align: center;
+            margin-top: 28px;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 11px;
+            letter-spacing: 0.25em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<script>
+// 이미지 로드 실패 시 우아한 플레이스홀더로 대체
+window.addEventListener('error', function(e){
+    if(e.target.tagName !== 'IMG') return;
+    var img = e.target;
+    img.style.display = 'none';
+    var wrap = img.parentElement;
+    if(!wrap || wrap.querySelector('.img-fb')) return;
+    var card = wrap.closest('.card');
+    var name = card && card.querySelector('.card-name');
+    var fb = document.createElement('div');
+    fb.className = 'img-fb';
+    fb.style.cssText = 'font-family:"Cormorant Garamond",serif;font-style:italic;color:rgba(92,26,34,0.35);font-size:38px;letter-spacing:0.05em;';
+    fb.textContent = name ? name.textContent.trim().slice(0,1).toLowerCase() + '.' : '·';
+    wrap.appendChild(fb);
+}, true);
+</script>
+
+<div class="staff-header">
+    <div class="staff-mode">Staff Mode · Service</div>
+    <div class="staff-title">소믈리에 주점</div>
+    <div class="table-selector">
+        <span class="ts-label">Table</span>
+        <input type="number" id="target-table-id" class="table-input" value="{{ table_id }}" onchange="changeTable()">
+        <span class="ts-suffix">번</span>
+    </div>
+</div>
+
+<div class="container">
+    <div class="status-box">
+        <div class="status-head">
+            <div class="status-title" id="status-target-title">테이블 주문 내역</div>
+            <div class="status-meta">auto · 5s</div>
+        </div>
+        <div id="grouped-status-list">
+            <div class="empty-state">번호를 입력하면 내역이 표시됩니다.</div>
+        </div>
+    </div>
+
+    {% for cat in ['liquor', 'food', 'etc'] %}
+    <div class="cat">
+        <span class="cat-num">0{{ loop.index }}</span>
+        <span class="cat-name">
+            {% if cat == 'liquor' %}와인 서비스
+            {% elif cat == 'food' %}안주 요리
+            {% else %}기타 서비스{% endif %}
+        </span>
+        <span class="cat-line"></span>
+        <span class="cat-sub">{% if cat == 'liquor' %}Wine{% elif cat == 'food' %}Food{% else %}Etc.{% endif %}</span>
+    </div>
+    <div class="grid">
+        {% for menu in menus if menu.category == cat %}
+        <div class="card">
+            <div class="card-img-wrap">
+                {% if menu.stock <= 0 %}<div class="sold-overlay">Sold out</div>{% endif %}
+                <img src="/static/{{ menu.img }}" style="{% if menu.stock <= 0 %}filter: grayscale(1);{% endif %}">
+            </div>
+            <div class="card-body">
+                <div class="card-name">{{ menu.name }}</div>
+                <div class="card-rule"></div>
+                <div class="card-price">{{ menu.price | format_price }}<span class="krw">KRW</span></div>
+            </div>
+            <button class="add-btn"
+                    data-name="{{ menu.name }}"
+                    data-price="{{ menu.price }}"
+                    onclick="addToCart(this)"
+                    {% if menu.stock <= 0 %}disabled{% endif %}>
+                {% if menu.stock <= 0 %}품절{% else %}담기 · ADD{% endif %}
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="credit">— Developed by 창식 · 동민 —</div>
+</div>
+
+<div class="cart-bar" id="cart-bar" style="display:none;">
+    <div>
+        <div class="cart-label">Cart</div>
+        <div class="cart-count" id="cart-text">0개</div>
+    </div>
+    <button class="view-cart-btn" onclick="openCart()">장바구니 확인</button>
+</div>
+
+<div id="cart-modal">
+    <div class="modal-content">
+        <div class="modal-label">Order Confirmation</div>
+        <div class="modal-title">주문 내역 확인</div>
+        <div id="modal-items-list"></div>
+        <div class="modal-actions">
+            <button class="btn-close" onclick="closeCart()">닫기</button>
+            <button class="btn-submit" onclick="submitOrder()">최종 주문 넣기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentTable = document.getElementById('target-table-id').value;
+    let cart = [];
+
+    function changeTable() {
+        currentTable = document.getElementById('target-table-id').value;
+        if (!currentTable) { alert("테이블 번호를 입력해주세요."); return; }
+        document.getElementById('status-target-title').innerText = `${currentTable}번 테이블 주문 내역`;
+        fetchStatus();
+    }
+
+    function addToCart(btn) {
+        if (!currentTable) { alert("테이블 번호를 먼저 입력하세요!"); return; }
+        const name = btn.getAttribute('data-name');
+        const price = parseInt(btn.getAttribute('data-price'));
+        cart.push({ name, price });
+        updateCartBar();
+    }
+
+    function updateCartBar() {
+        const bar = document.getElementById('cart-bar');
+        bar.style.display = cart.length > 0 ? 'flex' : 'none';
+        document.getElementById('cart-text').innerText = `${cart.length}개 선택 · Table ${currentTable}`;
+    }
+
+    function openCart() {
+        const list = document.getElementById('modal-items-list');
+        const grouped = cart.reduce((acc, i) => { acc[i.name] = (acc[i.name] || 0) + 1; return acc; }, {});
+        list.innerHTML = Object.keys(grouped).map(name => `
+            <div class="cart-row">
+                <div class="cart-row-name">${name}</div>
+                <div class="cart-row-count">× ${grouped[name]}</div>
+            </div>
+        `).join('');
+        document.getElementById('cart-modal').style.display = 'block';
+    }
+
+    function closeCart() { document.getElementById('cart-modal').style.display = 'none'; }
+
+    function submitOrder() {
+        fetch('/api/order', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({table_id: currentTable, items: cart.map(i => i.name)})
+        }).then(res => res.json()).then(data => {
+            if(data.status === 'success') {
+                alert(`${currentTable}번 주문 완료!`);
+                cart = []; updateCartBar(); closeCart(); fetchStatus();
+            } else { alert("오류: " + data.message); }
+        });
+    }
+
+    function fetchStatus() {
+        if (!currentTable) return;
+        fetch(`/api/table_status/${currentTable}`).then(res => res.json()).then(data => {
+            const list = document.getElementById('grouped-status-list');
+            const activeOrders = (data.orders || []);
+            if (activeOrders.length === 0) {
+                list.innerHTML = '<div class="empty-state">주문 내역이 없습니다.</div>';
+                return;
+            }
+            const grouped = activeOrders.reduce((acc, o, idx) => {
+                const key = `${o.menu_name}-${o.status}`;
+                if (!acc[key]) acc[key] = { name: o.menu_name, status: o.status, count: 0, indices: [] };
+                acc[key].count++; acc[key].indices.push(idx); return acc;
+            }, {});
+            list.innerHTML = Object.values(grouped).map(g => `
+                <div class="status-item">
+                    <div>
+                        <span class="si-name">${g.name}</span><span class="si-count">× ${g.count}</span>
+                        <span class="si-state">${g.status}</span>
+                    </div>
+                    <div class="si-actions">
+                        <button class="mini-btn serve" onclick="toggleServe(${g.indices[0]})">처리</button>
+                        <button class="mini-btn cancel" onclick="cancelOrder(${g.indices[0]})">삭제</button>
+                    </div>
+                </div>`).join('');
+        }).catch(()=>{});
+    }
+
+    function toggleServe(idx) { fetch('/api/serve', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({table_id:currentTable, order_idx:idx})}).then(fetchStatus); }
+    function cancelOrder(idx) { if(confirm("삭제하시겠습니까?")) fetch('/api/cancel_order', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({table_id:currentTable, order_idx:idx})}).then(fetchStatus); }
+
+    setInterval(fetchStatus, 5000);
+    if(currentTable) fetchStatus();
+</script>
+</body>
+</html>

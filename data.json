@@ -1,0 +1,137 @@
+{
+    "menu": [
+        {
+            "id": 1,
+            "category": "liquor",
+            "name": "Jaume Serra Cava(스파클링)",
+            "price": 32000,
+            "is_alcohol": true,
+            "stock": 20,
+            "img": "Sparkling.png",
+            "is_best": false
+        },
+        {
+            "id": 2,
+            "category": "liquor",
+            "name": "Rapel Carilisa Moscato(디저트)",
+            "price": 28000,
+            "is_alcohol": true,
+            "stock": 40,
+            "img": "Dessert.jpg",
+            "is_best": false
+        },
+        {
+            "id": 3,
+            "category": "liquor",
+            "name": "Umani Ronchi Vigor(레드)",
+            "price": 37000,
+            "is_alcohol": true,
+            "stock": 20,
+            "img": "red.jpg",
+            "is_best": false
+        },
+        {
+            "id": 4,
+            "category": "liquor",
+            "name": "Montford Estate(화이트)",
+            "price": 35000,
+            "is_alcohol": true,
+            "stock": 20,
+            "img": "White.png",
+            "is_best": false
+        },
+        {
+            "id": 5,
+            "category": "food",
+            "name": "나쵸 세트",
+            "price": 15000,
+            "is_alcohol": false,
+            "stock": 50,
+            "img": "nacho.png",
+            "is_best": false
+        },
+        {
+            "id": 6,
+            "category": "food",
+            "name": "오레오베이컨말이(6pcs)",
+            "price": 13000,
+            "is_alcohol": false,
+            "stock": 40,
+            "img": "oreo.png",
+            "is_best": true
+        },
+        {
+            "id": 7,
+            "category": "food",
+            "name": "해시브라운(3pcs)",
+            "price": 15000,
+            "is_alcohol": false,
+            "stock": 40,
+            "img": "brown.png",
+            "is_best": false
+        },
+        {
+            "id": 8,
+            "category": "food",
+            "name": "소시지 플래터",
+            "price": 19000,
+            "is_alcohol": false,
+            "stock": 50,
+            "img": "sausage.png",
+            "is_best": false
+        },
+        {
+            "id": 9,
+            "category": "food",
+            "name": "버섯크림 파스타",
+            "price": 23000,
+            "is_alcohol": false,
+            "stock": 50,
+            "img": "pasta.png",
+            "is_best": true
+        },
+        {
+            "id": 10,
+            "category": "food",
+            "name": "치즈케이크",
+            "price": 8000,
+            "is_alcohol": false,
+            "stock": 30,
+            "img": "cheeze.png",
+            "is_best": false
+        },
+        {
+            "id": 11,
+            "category": "etc",
+            "name": "합석 비용",
+            "price": 5000,
+            "is_alcohol": false,
+            "stock": 999,
+            "img": "plus.jpg",
+            "is_best": false
+        },
+        {
+            "id": 12,
+            "category": "etc",
+            "name": "물",
+            "price": 1000,
+            "is_alcohol": false,
+            "stock": 100,
+            "img": "water.png",
+            "is_best": false
+        },
+        {
+            "id": 13,
+            "category": "etc",
+            "name": "프리미엄 와인(판매 이전 운영팀 문의)",
+            "price": 100000,
+            "is_alcohol": true,
+            "stock": 6,
+            "img": "premium.jpg",
+            "is_best": false
+        }
+    ],
+    "tables": {},
+    "cumulative_revenue": 0,
+    "sales_stats": {}
+}

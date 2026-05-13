@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소믈리에 주점 | 메뉴판</title>
+    <style>
+        /* 1. 브랜드 테마 및 사진 디자인 복원 */
+        :root {
+            --ku-crimson: #862633;
+            --ku-gold: #c5a059;
+            --bg-light: #f8f9fa;
+        }
+
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-light); margin: 0; padding-bottom: 50px; line-height: 1.6; }
+        .container { max-width: 500px; margin: 0 auto; padding: 0 15px; }
+        
+        /* 사진 속 버건디 헤더 복원 */
+        .brand-header {
+            background-color: var(--ku-crimson);
+            color: white;
+            padding: 45px 20px 35px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .brand-sub { font-size: 0.8em; font-weight: 300; letter-spacing: 2px; opacity: 0.85; margin-bottom: 8px; }
+        .brand-title { font-size: 1.8em; font-weight: 800; }
+
+        /* 사진 속 노란색 이용 수칙 박스 복원 */
+        .notice-banner { 
+            background: #fffbe6; 
+            border: 1px solid #ffe58f; 
+            padding: 22px; 
+            border-radius: 20px; 
+            margin-bottom: 25px; 
+            font-size: 0.88em; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            color: #333;
+        }
+        .notice-title { 
+            color: var(--ku-crimson); 
+            font-weight: 800; 
+            font-size: 1.1em; 
+            display: block; 
+            margin-bottom: 10px; 
+            text-align: center;
+        }
+        
+        /* 사진 속 점선 계좌 박스 복원 */
+        .account-box { 
+            background: white; 
+            border: 1.5px dashed var(--ku-crimson); 
+            padding: 12px; 
+            margin-top: 15px; 
+            text-align: center; 
+            border-radius: 12px; 
+            color: #222; 
+            font-weight: 700; 
+            font-size: 1em; 
+        }
+
+        /* [추가] 실시간 주문 현황 섹션 */
+        .status-section { background: white; border-radius: 18px; padding: 18px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #eef0f2; }
+        .status-title-inner { font-weight: 800; font-size: 1.05em; margin-bottom: 15px; color: var(--ku-crimson); text-align: center; }
+        .status-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8f9fa; font-size: 0.95em; }
+
+        /* 카테고리 타이틀 */
+        .category-title { border-left: 5px solid var(--ku-crimson); padding-left: 12px; margin: 35px 0 15px; font-weight: 800; font-size: 1.1em; color: #222; }
+
+        /* 메뉴 카드 그리드 */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .menu-card { background: white; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f1f1; position: relative; }
+        .menu-img { width: 100%; height: 125px; object-fit: contain; background: #fff; }
+        .menu-info { padding: 15px; text-align: center; }
+        .menu-name { font-weight: 700; font-size: 1em; margin-bottom: 5px; color: #222; }
+        .menu-price { color: var(--ku-crimson); font-weight: 800; font-size: 0.95em; }
+
+        /* 품절 상태 */
+        .sold-out { filter: grayscale(1); opacity: 0.6; }
+        .sold-out-badge { position: absolute; top: 45px; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: white; text-align: center; padding: 5px 0; font-weight: bold; transform: rotate(-15deg); z-index: 10; }
+
+        /* [신규] 추천 메뉴 배지 스타일 */
+        .best-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--ku-gold);
+            color: #000;
+            padding: 4px 8px;
+            font-size: 0.7em;
+            font-weight: 800;
+            border-radius: 6px;
+            z-index: 8;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="brand-header">
+    <div class="brand-sub">KOREA UNIVERSITY WINE CLUB</div>
+    <div class="brand-title">🐯 🍷 소믈리에 주점 🍷 🐯</div>
+</div>
+
+<div class="container">
+    <div class="notice-banner">
+        <span class="notice-title">📢 주점 이용 수칙 📢</span>
+        본 주점은 주류법에 의거, <strong>주류를 직접 판매하지 않습니다.</strong><br>
+        외부 주류 반입 시 제공되는 <strong>콜키지 서비스(잔, 얼음 등)</strong> 및 <strong>배달 수령 대행 서비스</strong>만 가능함을 안내드립니다.<br>
+        조리는 입금이 확인되는 대로 진행됩니다. 원활한 운영을 위해 <strong>테이블 번호로 입금자 명을 변경하여</strong> 입금 부탁드립니다.
+        
+        <div class="account-box">
+            기업은행 982-180252-01-010 (예금주: 백지훈)
+        </div>
+    </div>
+
+    <!-- 실시간 내 주문 현황 (손님 확인용) -->
+    <div class="status-section" id="guest-status-area" style="display: none;">
+        <div class="status-title-inner">📋 내 테이블 주문 현황</div>
+        <div id="guest-order-list">
+            <!-- 자바스크립트로 주문 내역이 채워짐 -->
+        </div>
+        <p style="font-size: 0.75em; color: #999; text-align: center; margin-top: 10px;">(정보는 60초마다 자동 갱신됩니다)</p>
+    </div>
+
+    <!-- 1. 안주 요리 섹션 -->
+    <div class="category-title">🍽️ 안주 요리 (Food)</div>
+    <div class="menu-grid">
+        {% for menu in menus if menu.category == 'food' %}
+        <div class="menu-card {% if menu.stock <= 0 %}sold-out{% endif %}">
+            <!-- 추천 배지 추가 (재고 있을 때만 표시) -->
+            {% if menu.is_best and menu.stock > 0 %}
+            <div class="best-badge"> 추천 ⭐</div>
+            {% endif %}
+
+            {% if menu.stock <= 0 %}
+            <div class="sold-out-badge">SOLD OUT</div>
+            {% endif %}
+            
+            <img src="/static/{{ menu.img }}" class="menu-img" 
+                 style="{% if menu.stock <= 0 %}filter: grayscale(1); opacity: 0.5;{% endif %}">
+            
+            <div class="menu-info">
+                <div class="menu-name">{{ menu.name }}</div>
+                <div class="menu-price" style="{% if menu.stock <= 0 %}color: #aaa;{% endif %}">
+                    {{ menu.price | format_price }}원
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div> <!-- 안주 그리드 끝 -->
+
+    <!-- 2. 기타 항목 섹션 -->
+    <div class="category-title">🥤 음료 및 기타 (Etc)</div>
+    <div class="menu-grid">
+        {% for menu in menus if menu.category == 'etc' %}
+        <div class="menu-card {% if menu.stock <= 0 %}sold-out{% endif %}">
+            <!-- 추천 배지 추가 (기타 카테고리에도 동일 로직 적용) -->
+            {% if menu.is_best and menu.stock > 0 %}
+            <div class="best-badge">와인동아리 추천 ⭐</div>
+            {% endif %}
+
+            {% if menu.stock <= 0 %}
+            <div class="sold-out-badge">SOLD OUT</div>
+            {% endif %}
+
+            <img src="/static/{{ menu.img }}" class="menu-img" 
+                 style="{% if menu.stock <= 0 %}filter: grayscale(1); opacity: 0.5;{% endif %}">
+            
+            <div class="menu-info">
+                <div class="menu-name">{{ menu.name }}</div>
+                <div class="menu-price" style="{% if menu.stock <= 0 %}color: #aaa;{% endif %}">
+                    {{ menu.price | format_price }}원
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div> <!-- 기타 그리드 끝 -->
+</div> <!-- container 끝 -->
+
+<script>
+    // 현재 URL에서 테이블 번호 추출 (예: /menu?table=5 등) 
+    const params = new URLSearchParams(window.location.search);
+    const tableId = params.get('table'); 
+
+    function fetchStatus() {
+        if (!tableId) return; 
+
+        fetch(`/api/table_status/${tableId}`)
+            .then(res => res.json())
+            .then(data => {
+                const area = document.getElementById('guest-status-area');
+                const list = document.getElementById('guest-order-list');
+                
+                const activeOrders = data.orders || [];
+                
+                if (activeOrders.length > 0) {
+                    area.style.display = 'block';
+                    
+                    const grouped = activeOrders.reduce((acc, o) => {
+                        const key = `${o.menu_name}-${o.status}`;
+                        if (!acc[key]) acc[key] = { name: o.menu_name, status: o.status, count: 0 };
+                        acc[key].count++;
+                        return acc;
+                    }, {});
+
+                    list.innerHTML = Object.values(grouped).map(g => `
+                        <div class="status-item">
+                            <div><strong>${g.name}</strong> <span style="color:var(--ku-crimson);">x ${g.count}</span></div>
+                            <div style="font-size:0.85em; color:#666;">${g.status}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    area.style.display = 'none';
+                }
+            })
+            .catch(err => console.log("서버 연결 대기 중..."));
+    }
+
+    const REFRESH_INTERVAL = 60000; 
+    setInterval(fetchStatus, REFRESH_INTERVAL);
+    fetchStatus();
+</script>
+
+</body>
+</html>

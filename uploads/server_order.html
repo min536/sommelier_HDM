@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서빙 패널 | 통합 모드</title>
+    <style>
+        :root { --ku-crimson: #862633; --ku-gold: #c5a059; --staff-dark: #212529; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f4f6f8; margin: 0; padding-bottom: 150px; }
+        
+        /* 상단 헤더 디자인 */
+        .staff-header { background: var(--staff-dark); color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 30px 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .container { max-width: 500px; margin: 0 auto; padding: 15px; }
+        
+        /* 테이블 번호 입력창 */
+        .table-selector { background: rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 15px; margin-top: 15px; display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.2); }
+        .table-input { width: 65px; background: white; border: none; padding: 8px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 1.1em; color: var(--staff-dark); }
+        
+        /* 주문 내역 박스 */
+        .status-box { background: white; border-radius: 20px; padding: 18px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .status-title { font-weight: bold; color: var(--ku-crimson); margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 0.95em; }
+        .status-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #f1f1f1; }
+        
+        /* 카테고리 및 메뉴 그리드 */
+        .category-title { border-left: 5px solid var(--ku-crimson); padding-left: 10px; margin: 25px 0 15px; font-weight: bold; color: #333; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .menu-card { background: white; border-radius: 15px; overflow: hidden; border: 1px solid #eee; position: relative; display: flex; flex-direction: column; }
+        .menu-img { width: 100%; height: 110px; object-fit: contain; background: #fff; padding: 5px; }
+        .add-btn { background: var(--staff-dark); color: white; border: none; width: 100%; padding: 12px; font-weight: bold; cursor: pointer; margin-top: auto; }
+        
+        /* 품절 스타일 */
+        .sold-out-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 110px; background: rgba(0,0,0,0.5); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 5; }
+        
+        /* 버튼 스타일 */
+        .btn-serve { background: #e7f5ff; color: #007bff; border: 1px solid #74c0fc; padding: 5px 10px; border-radius: 6px; font-size: 0.8em; cursor: pointer; }
+        .btn-cancel { background: #fff5f5; color: #fa5252; border: 1px solid #ffa8a8; padding: 5px 10px; border-radius: 6px; font-size: 0.8em; margin-left: 4px; cursor: pointer; }
+        
+        /* 하단 장바구니 바 */
+        .cart-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #333; color: white; padding: 15px 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 100; }
+        .view-cart-btn { background: var(--ku-gold); color: black; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+
+        /* 모달 */
+        #cart-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; backdrop-filter: blur(2px); }
+        .modal-content { background: white; width: 85%; max-width: 400px; margin: 15vh auto; border-radius: 20px; padding: 25px; }
+        .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f1f1; }
+    </style>
+</head>
+<body>
+
+<div class="staff-header">
+    <div style="font-size: 0.7em; color: #aaa; margin-bottom: 10px; opacity: 0.8;">Developed by 창식, 동민</div>
+    <div style="font-size: 1.4em; font-weight: 800;">🏃 서빙팀 주문 관리 패널</div>
+    
+    <div class="table-selector">
+        <span style="font-size: 0.9em; font-weight: bold; color: var(--ku-gold);">현재 테이블 번호:</span>
+        <input type="number" id="target-table-id" class="table-input" value="{{ table_id }}" onchange="changeTable()">
+        <span style="font-size: 0.9em;">번</span>
+    </div>
+</div>
+
+<div class="container">
+    <div class="status-box">
+        <div class="status-title" id="status-target-title">📝 테이블 주문 내역</div>
+        <div id="grouped-status-list">
+            <p style="text-align:center; color:#999; font-size:0.85em;">번호를 입력하면 내역이 뜹니다.</p>
+        </div>
+    </div>
+
+    {% for cat in ['liquor', 'food', 'etc'] %}
+    <div class="category-title">
+        {% if cat == 'liquor' %}🍷 와인 서비스 (Wine)
+        {% elif cat == 'food' %}🍽️ 안주 요리 (Food)
+        {% else %}🥤 기타 서비스 (Etc){% endif %}
+    </div>
+    <div class="menu-grid">
+        {% for menu in menus if menu.category == cat %}
+        <div class="menu-card">
+            {% if menu.stock <= 0 %}
+            <div class="sold-out-overlay">품절</div>
+            {% endif %}
+            
+            <img src="/static/{{ menu.img }}" class="menu-img" style="{% if menu.stock <= 0 %}filter: grayscale(1);{% endif %}">
+            <div style="padding:10px; text-align:center;">
+                <div style="font-weight:700; font-size:0.9em; margin-bottom:5px;">{{ menu.name }}</div>
+                <div style="color:var(--ku-crimson); font-size:0.85em; font-weight:800;">{{ menu.price | format_price }}원</div>
+            </div>
+            
+            <button class="add-btn" 
+                    data-name="{{ menu.name }}" 
+                    data-price="{{ menu.price }}"
+                    onclick="addToCart(this)" 
+                    {% if menu.stock <= 0 %}disabled style="background: #ccc; cursor: not-allowed;"{% endif %}>
+                {% if menu.stock <= 0 %}품절{% else %}담기{% endif %}
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+<div class="cart-bar" id="cart-bar" style="display:none;">
+    <div id="cart-text">0개 선택됨</div>
+    <button class="view-cart-btn" onclick="openCart()">장바구니 확인</button>
+</div>
+
+<div id="cart-modal">
+    <div class="modal-content">
+        <h3 style="text-align:center; margin-top:0;">🛒 주문 확인</h3>
+        <div id="modal-items-list"></div>
+        <div style="display:grid; grid-template-columns: 1fr 2.5fr; gap:10px; margin-top:20px;">
+            <button onclick="closeCart()" style="padding:12px; border-radius:10px; border:none; background:#eee;">닫기</button>
+            <button onclick="submitOrder()" style="padding:12px; border-radius:10px; border:none; background:var(--ku-crimson); color:white; font-weight:bold;">최종 주문 넣기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentTable = document.getElementById('target-table-id').value;
+    let cart = [];
+
+    function changeTable() {
+        currentTable = document.getElementById('target-table-id').value;
+        if (!currentTable) { alert("테이블 번호를 입력해주세요."); return; }
+        document.getElementById('status-target-title').innerText = `📝 ${currentTable}번 테이블 주문 내역`;
+        fetchStatus();
+    }
+
+    function addToCart(btn) {
+        if (!currentTable) { alert("테이블 번호를 먼저 입력하세요!"); return; }
+        const name = btn.getAttribute('data-name');
+        const price = parseInt(btn.getAttribute('data-price'));
+        cart.push({ name, price });
+        updateCartBar();
+    }
+
+    function updateCartBar() {
+        const bar = document.getElementById('cart-bar');
+        bar.style.display = cart.length > 0 ? 'flex' : 'none';
+        document.getElementById('cart-text').innerText = `${cart.length}개 선택됨 (Table ${currentTable})`;
+    }
+
+    function openCart() {
+        const list = document.getElementById('modal-items-list');
+        const grouped = cart.reduce((acc, i) => { acc[i.name] = (acc[i.name] || 0) + 1; return acc; }, {});
+        list.innerHTML = Object.keys(grouped).map(name => `
+            <div class="cart-row">
+                <div style="font-weight:bold; font-size:0.9em;">${name}</div>
+                <div style="background:#f8f9fa; padding:2px 8px; border-radius:5px; font-weight:bold;">${grouped[name]}개</div>
+            </div>
+        `).join('');
+        document.getElementById('cart-modal').style.display = 'block';
+    }
+
+    function closeCart() { document.getElementById('cart-modal').style.display = 'none'; }
+
+    function submitOrder() {
+        fetch('/api/order', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({table_id: currentTable, items: cart.map(i => i.name)})
+        }).then(res => res.json()).then(data => {
+            if(data.status === 'success') {
+                alert(`${currentTable}번 주문 완료!`);
+                cart = []; updateCartBar(); closeCart(); fetchStatus();
+            } else { alert("오류: " + data.message); }
+        });
+    }
+
+    function fetchStatus() {
+        if (!currentTable) return;
+        fetch(`/api/table_status/${currentTable}`).then(res => res.json()).then(data => {
+            const list = document.getElementById('grouped-status-list');
+            const activeOrders = (data.orders || []);
+            if (activeOrders.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#999; font-size:0.85em;">주문 내역이 없습니다.</p>';
+                return;
+            }
+            const grouped = activeOrders.reduce((acc, o, idx) => {
+                const key = `${o.menu_name}-${o.status}`;
+                if (!acc[key]) acc[key] = { name: o.menu_name, status: o.status, count: 0, indices: [] };
+                acc[key].count++; acc[key].indices.push(idx); return acc;
+            }, {});
+            list.innerHTML = Object.values(grouped).map(g => `
+                <div class="status-item">
+                    <div style="font-size:0.9em;"><strong>${g.name}</strong> <span style="color:var(--ku-crimson);">x ${g.count}</span><br><small>${g.status}</small></div>
+                    <div>
+                        <button class="btn-serve" onclick="toggleServe(${g.indices[0]})">처리</button>
+                        <button class="btn-cancel" onclick="cancelOrder(${g.indices[0]})">삭제</button>
+                    </div>
+                </div>`).join('');
+        });
+    }
+
+    function toggleServe(idx) { fetch('/api/serve', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({table_id:currentTable, order_idx:idx})}).then(fetchStatus); }
+    function cancelOrder(idx) { if(confirm("삭제하시겠습니까?")) fetch('/api/cancel_order', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({table_id:currentTable, order_idx:idx})}).then(fetchStatus); }
+
+    setInterval(fetchStatus, 5000);
+    if(currentTable) fetchStatus();
+</script>
+</body>
+</html>

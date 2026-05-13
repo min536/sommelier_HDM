@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.DS_Store
+sommelier.sqlite3
+sommelier.sqlite3-wal
+sommelier.sqlite3-shm

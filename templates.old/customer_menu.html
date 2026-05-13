@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소믈리에 주점 | 메뉴</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --wine: #862633;
+            --wine-deep: #5C1A22;
+            --gold: #B8924A;
+            --gold-soft: #D4B574;
+            --cream: #FAF6F0;
+            --paper: #FFFCF7;
+            --ink: #1A1A1A;
+            --muted: #7A7068;
+            --rule: #E8DFD0;
+            --success: #2D6A4F;
+            --alert: #C53030;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            background: var(--cream);
+            margin: 0;
+            padding: 0 0 60px;
+            color: var(--ink);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+        }
+        .serif { font-family: 'Noto Serif KR', serif; }
+        .latin { font-family: 'Cormorant Garamond', serif; }
+        .container { max-width: 520px; margin: 0 auto; padding: 0 18px; }
+        @media (max-width: 380px) {
+            .container { padding: 0 14px; }
+            .hero { padding: 44px 20px 52px; }
+            .hero-title { font-size: 28px; }
+            .hero-est { font-size: 12px; }
+            .grid { gap: 12px; }
+        }
+
+        /* ───── HERO ───── */
+        .hero {
+            background: var(--wine);
+            color: var(--paper);
+            padding: 56px 24px 64px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before, .hero::after {
+            content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+            width: 48px; height: 1px; background: var(--gold-soft);
+        }
+        .hero::before { top: 38px; }
+        .hero::after  { bottom: 42px; }
+        .hero-est {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 14px;
+            letter-spacing: 0.18em;
+            color: var(--gold-soft);
+            margin-bottom: 18px;
+            text-transform: uppercase;
+        }
+        .hero-title {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 900;
+            font-size: 34px;
+            letter-spacing: 0.04em;
+            line-height: 1.15;
+        }
+        .hero-sub {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            letter-spacing: 0.3em;
+            margin-top: 16px;
+            color: rgba(255,252,247,0.7);
+            text-transform: uppercase;
+        }
+
+        /* ───── NOTICE ───── */
+        .notice {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-top: 2px solid var(--gold);
+            padding: 26px 24px;
+            margin-top: -24px;
+            position: relative;
+            margin-bottom: 36px;
+            font-size: 14px;
+            color: #3A332C;
+        }
+        .notice-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 12px;
+            letter-spacing: 0.3em;
+            color: var(--gold);
+            text-transform: uppercase;
+            display: block;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .notice-title {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 700;
+            font-size: 17px;
+            text-align: center;
+            margin-bottom: 16px;
+            color: var(--wine-deep);
+        }
+        .notice-body { line-height: 1.7; font-size: 13.5px; }
+        .notice-body strong { color: var(--wine); font-weight: 700; }
+        .account {
+            margin-top: 18px;
+            background: var(--cream);
+            border: 1px dashed var(--gold);
+            padding: 14px;
+            text-align: center;
+            font-size: 13.5px;
+        }
+        .account-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 11px;
+            letter-spacing: 0.25em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .account-num { font-weight: 700; color: var(--ink); letter-spacing: 0.02em; }
+
+        /* ───── STATUS ───── */
+        .status {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            padding: 20px 22px;
+            margin-bottom: 36px;
+        }
+        .status-head {
+            display: flex; justify-content: space-between; align-items: baseline;
+            padding-bottom: 12px; border-bottom: 1px solid var(--rule); margin-bottom: 12px;
+        }
+        .status-title { font-family: 'Noto Serif KR', serif; font-weight: 700; font-size: 15px; color: var(--wine-deep); }
+        .status-meta { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; color: var(--muted); }
+        .status-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; font-size: 14px; border-bottom: 1px dotted var(--rule);
+        }
+        .status-item:last-child { border-bottom: none; }
+        .status-name { font-weight: 600; }
+        .status-count { color: var(--wine); font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 16px; margin-left: 6px; }
+        .status-state { font-size: 11.5px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+
+        /* ───── CATEGORY ───── */
+        .cat {
+            display: flex; align-items: baseline; gap: 14px;
+            margin: 44px 0 18px;
+        }
+        .cat-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 22px;
+            color: var(--gold);
+            font-weight: 500;
+        }
+        .cat-name {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 700;
+            font-size: 19px;
+            color: var(--ink);
+            letter-spacing: 0.02em;
+        }
+        .cat-line { flex: 1; height: 1px; background: var(--rule); }
+        .cat-sub {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 13px;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+        }
+
+        /* ───── MENU GRID ───── */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .card {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-img-wrap {
+            background: linear-gradient(180deg, #F5EFE3 0%, #EDE4D2 100%);
+            aspect-ratio: 4 / 3;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .card-img-wrap img { width: 88%; height: 88%; object-fit: contain; }
+        .card-body { padding: 14px 14px 16px; text-align: center; }
+        .card-name {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 600;
+            font-size: 14.5px;
+            margin-bottom: 8px;
+            color: var(--ink);
+            letter-spacing: 0.01em;
+        }
+        .card-rule { width: 24px; height: 1px; background: var(--gold); margin: 0 auto 8px; }
+        .card-price {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--wine-deep);
+            letter-spacing: 0.02em;
+        }
+        .card-price .krw {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 11px;
+            color: var(--muted);
+            margin-left: 2px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+        }
+
+        /* Best badge */
+        .badge {
+            position: absolute;
+            top: 10px; left: 10px;
+            background: var(--paper);
+            color: var(--wine-deep);
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            padding: 4px 10px;
+            border: 1px solid var(--gold);
+            text-transform: uppercase;
+            z-index: 5;
+        }
+        .badge::before { content: '★ '; color: var(--gold); font-style: normal; }
+
+        /* Sold out */
+        .sold .card-img-wrap { filter: grayscale(1) brightness(0.96); opacity: 0.65; }
+        .sold .card-name, .sold .card-price { color: #A89E92; }
+        .sold-stamp {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-8deg);
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 22px;
+            letter-spacing: 0.3em;
+            color: var(--wine);
+            border: 2px solid var(--wine);
+            padding: 4px 18px;
+            background: rgba(255,252,247,0.92);
+            z-index: 6;
+            text-transform: uppercase;
+        }
+
+        /* ───── FOOTER ───── */
+        .foot {
+            text-align: center;
+            margin-top: 56px;
+            padding-top: 28px;
+            border-top: 1px solid var(--rule);
+            color: var(--muted);
+        }
+        .foot-mark {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 14px;
+            letter-spacing: 0.25em;
+            color: var(--gold);
+            text-transform: uppercase;
+        }
+        .foot-text { font-size: 11.5px; letter-spacing: 0.1em; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+<script>
+// 이미지 로드 실패 시 우아한 플레이스홀더로 대체
+window.addEventListener('error', function(e){
+    if(e.target.tagName !== 'IMG') return;
+    var img = e.target;
+    img.style.display = 'none';
+    var wrap = img.parentElement;
+    if(!wrap || wrap.querySelector('.img-fb')) return;
+    var card = wrap.closest('.card');
+    var name = card && card.querySelector('.card-name');
+    var fb = document.createElement('div');
+    fb.className = 'img-fb';
+    fb.style.cssText = 'font-family:"Cormorant Garamond",serif;font-style:italic;color:rgba(92,26,34,0.35);font-size:42px;letter-spacing:0.05em;';
+    fb.textContent = name ? name.textContent.trim().slice(0,1).toLowerCase() + '.' : '·';
+    wrap.appendChild(fb);
+}, true);
+</script>
+
+<div class="hero">
+    <div class="hero-est">Est. 2026 · Korea University</div>
+    <div class="hero-title">소믈리에 주점</div>
+    <div class="hero-sub">— Wine &amp; Pairing —</div>
+</div>
+
+<div class="container">
+    <div class="notice">
+        <span class="notice-label">House Rules</span>
+        <div class="notice-title">주점 이용 안내</div>
+        <div class="notice-body">
+            본 주점은 주류법에 의거, <strong>주류를 직접 판매하지 않습니다.</strong>
+            외부 주류 반입 시 제공되는 <strong>콜키지 서비스(잔·얼음 등)</strong> 및
+            <strong>배달 수령 대행</strong>만 가능합니다.<br><br>
+            조리는 입금이 확인되는 대로 진행됩니다. 원활한 운영을 위해
+            <strong>테이블 번호로 입금자 명을 변경</strong>하여 입금 부탁드립니다.
+        </div>
+        <div class="account">
+            <div class="account-label">Payment</div>
+            <div class="account-num">기업은행 982-180252-01-010</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">예금주 · 백지훈</div>
+        </div>
+    </div>
+
+    <div class="status" id="guest-status-area" style="display: none;">
+        <div class="status-head">
+            <div class="status-title">내 테이블 주문 현황</div>
+            <div class="status-meta">auto refresh · 60s</div>
+        </div>
+        <div id="guest-order-list"></div>
+    </div>
+
+    <!-- 1. 안주 요리 -->
+    <div class="cat">
+        <span class="cat-num">01</span>
+        <span class="cat-name">안주 요리</span>
+        <span class="cat-line"></span>
+        <span class="cat-sub">Food</span>
+    </div>
+    <div class="grid">
+        {% for menu in menus if menu.category == 'food' %}
+        <div class="card {% if menu.stock <= 0 %}sold{% endif %}">
+            {% if menu.is_best and menu.stock > 0 %}
+            <div class="badge">Recommend</div>
+            {% endif %}
+            <div class="card-img-wrap">
+                {% if menu.stock <= 0 %}<div class="sold-stamp">Sold out</div>{% endif %}
+                <img src="/static/{{ menu.img }}" alt="{{ menu.name }}">
+            </div>
+            <div class="card-body">
+                <div class="card-name">{{ menu.name }}</div>
+                <div class="card-rule"></div>
+                <div class="card-price">{{ menu.price | format_price }}<span class="krw">KRW</span></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 2. 음료 및 기타 -->
+    <div class="cat">
+        <span class="cat-num">02</span>
+        <span class="cat-name">음료 및 기타</span>
+        <span class="cat-line"></span>
+        <span class="cat-sub">Etc.</span>
+    </div>
+    <div class="grid">
+        {% for menu in menus if menu.category == 'etc' %}
+        <div class="card {% if menu.stock <= 0 %}sold{% endif %}">
+            {% if menu.is_best and menu.stock > 0 %}
+            <div class="badge">Club Pick</div>
+            {% endif %}
+            <div class="card-img-wrap">
+                {% if menu.stock <= 0 %}<div class="sold-stamp">Sold out</div>{% endif %}
+                <img src="/static/{{ menu.img }}" alt="{{ menu.name }}">
+            </div>
+            <div class="card-body">
+                <div class="card-name">{{ menu.name }}</div>
+                <div class="card-rule"></div>
+                <div class="card-price">{{ menu.price | format_price }}<span class="krw">KRW</span></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="foot">
+        <div class="foot-mark">— Sommelier —</div>
+        <div class="foot-text">KOREA UNIVERSITY WINE CLUB</div>
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const tableId = params.get('table');
+
+    function fetchStatus() {
+        if (!tableId) return;
+        fetch(`/api/table_status/${tableId}`)
+            .then(res => res.json())
+            .then(data => {
+                const area = document.getElementById('guest-status-area');
+                const list = document.getElementById('guest-order-list');
+                const activeOrders = data.orders || [];
+                if (activeOrders.length > 0) {
+                    area.style.display = 'block';
+                    const grouped = activeOrders.reduce((acc, o) => {
+                        const key = `${o.menu_name}-${o.status}`;
+                        if (!acc[key]) acc[key] = { name: o.menu_name, status: o.status, count: 0 };
+                        acc[key].count++;
+                        return acc;
+                    }, {});
+                    list.innerHTML = Object.values(grouped).map(g => `
+                        <div class="status-item">
+                            <div><span class="status-name">${g.name}</span><span class="status-count">× ${g.count}</span></div>
+                            <div class="status-state">${g.status}</div>
+                        </div>
+                    `).join('');
+                } else { area.style.display = 'none'; }
+            })
+            .catch(err => console.log("서버 연결 대기 중..."));
+    }
+    setInterval(fetchStatus, 60000);
+    fetchStatus();
+</script>
+
+</body>
+</html>
