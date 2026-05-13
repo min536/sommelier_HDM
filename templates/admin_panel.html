@@ -149,6 +149,19 @@
         }
         .section-rule { flex: 1; height: 1px; background: var(--rule); }
         .section-meta { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; color: var(--muted); }
+        .management-section {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-top: 3px solid var(--gold);
+            padding: 0 22px 22px;
+            margin-top: 52px;
+        }
+        .management-section .section {
+            margin-top: 24px;
+        }
+        .management-section .panel {
+            border-color: var(--rule-strong);
+        }
         .jump-input {
             font-family: 'Pretendard', sans-serif;
             font-size: 11px;
@@ -490,6 +503,8 @@
             }
             .kpi-val { font-size: 24px; }
             .section { margin: 28px 0 14px; }
+            .management-section { padding: 0 14px 18px; margin-top: 36px; }
+            .management-section .section { margin-top: 20px; }
             .section-num { font-size: 18px; }
             .section-title { font-size: 16px; }
             .section-meta { font-size: 11px; }
@@ -580,16 +595,18 @@ window.addEventListener('error', function(e){
     <div class="refresh-status" id="refresh-status"></div>
     <div id="display"></div>
 
-    <div class="section">
-        <span class="section-num">02</span>
-        <span class="section-title">메뉴 및 재고 관리</span>
-        <span class="section-rule"></span>
-        <span class="section-meta">Menu &amp; Stock</span>
-    </div>
-    <div class="panel" id="menu-management-panel"></div>
+    <div class="management-section">
+        <div class="section">
+            <span class="section-num">02</span>
+            <span class="section-title">메뉴 및 재고 관리</span>
+            <span class="section-rule"></span>
+            <span class="section-meta">Menu &amp; Stock</span>
+        </div>
+        <div class="panel" id="menu-management-panel"></div>
 
-    <div class="export-actions">
-        <button class="export-btn" onclick="downloadSales()">판매내역 Excel</button>
+        <div class="export-actions">
+            <button class="export-btn" onclick="downloadSales()">판매내역 Excel</button>
+        </div>
     </div>
 
     <div class="credit">— System designed by 동민 · 창식 —</div>
@@ -616,6 +633,11 @@ window.addEventListener('error', function(e){
             const h = Math.floor(mins / 60);
             const m = mins % 60;
             return m === 0 ? `${h}시간` : `${h}시간 ${m}분`;
+        }
+
+        function oldestPendingOrderId(tableInfo) {
+            const pending = tableInfo.orders.filter(o => o.status !== '서빙 완료');
+            return pending.length ? Math.min(...pending.map(o => o.order_id)) : Infinity;
         }
 
         function refresh() {
@@ -657,11 +679,10 @@ window.addEventListener('error', function(e){
                 let tableIds = Object.keys(res.tables);
                 if (tableSortMode === 'order') {
                     tableIds.sort((a, b) => {
-                        const ordersA = res.tables[a].orders;
-                        const ordersB = res.tables[b].orders;
-                        const minA = ordersA.length ? Math.min(...ordersA.map(o => o.order_id)) : Infinity;
-                        const minB = ordersB.length ? Math.min(...ordersB.map(o => o.order_id)) : Infinity;
-                        return minA - minB;
+                        const minA = oldestPendingOrderId(res.tables[a]);
+                        const minB = oldestPendingOrderId(res.tables[b]);
+                        if (minA !== minB) return minA - minB;
+                        return Number(a) - Number(b);
                     });
                 } else {
                     tableIds.sort((a, b) => Number(a) - Number(b));
