@@ -24,6 +24,12 @@ from db import (
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'sommelier-dev-fallback-key-change-in-prod')
+if not os.environ.get('SECRET_KEY'):
+    import logging
+    logging.getLogger(__name__).warning(
+        'SECRET_KEY env var not set — using development fallback. '
+        'Set SECRET_KEY before deploying to a shared network.'
+    )
 init_db()
 
 _ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'tedchang')
@@ -80,7 +86,8 @@ def login():
         if _check_credentials(username, password):
             session['admin_logged_in'] = True
             next_url = request.args.get('next', '')
-            return redirect(next_url if next_url.startswith('/') else url_for('admin_panel'))
+            safe = next_url.startswith('/') and not next_url.startswith('//')
+            return redirect(next_url if safe else url_for('admin_panel'))
         error = '아이디 또는 비밀번호가 올바르지 않습니다.'
     return render_template('login.html', error=error)
 
