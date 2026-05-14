@@ -577,7 +577,7 @@ window.addEventListener('error', function(e){
         <span class="section-num">01</span>
         <span class="section-title">테이블 실시간 현황</span>
         <span class="section-rule"></span>
-        <span class="section-meta">Live · 10s</span>
+        <span class="section-meta">Live · 20s</span>
         <div class="sort-toggle">
             <button class="sort-btn active" id="sort-table" onclick="setSortMode('table')">테이블 번호순</button>
             <button class="sort-btn" id="sort-order" onclick="setSortMode('order')">주문순</button>
@@ -602,7 +602,7 @@ window.addEventListener('error', function(e){
     <div class="credit">— System designed by 동민 · 창식 —</div>
 
     <script>
-        const REFRESH_INTERVAL_MS = 10000;
+        const REFRESH_INTERVAL_MS = 20000;
         let tableSortMode = 'table';
 
         function setSortMode(mode) {
@@ -633,11 +633,6 @@ window.addEventListener('error', function(e){
 
         function refresh() {
             const _pageX = window.scrollX, _pageY = window.scrollY;
-            const _listScrolls = {};
-            document.querySelectorAll('#display [data-table-id]').forEach(c => {
-                const ol = c.querySelector('.order-list');
-                if (ol) _listScrolls[c.dataset.tableId] = ol.scrollTop;
-            });
             fetch('/api/orders').then(r => r.json()).then(res => {
                 const _rs = document.getElementById('refresh-status');
                 _rs.textContent = '';
@@ -762,10 +757,6 @@ window.addEventListener('error', function(e){
                 });
 
                 window.scrollTo(_pageX, _pageY);
-                Object.entries(_listScrolls).forEach(([tId, top]) => {
-                    const c = document.querySelector(`#display [data-table-id="${tId}"]`);
-                    if (c) { const ol = c.querySelector('.order-list'); if (ol) ol.scrollTop = top; }
-                });
             }).catch(() => {
                 const _rs = document.getElementById('refresh-status');
                 _rs.textContent = '새로고침 실패 · 연결 상태 확인 필요';
