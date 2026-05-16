@@ -600,6 +600,21 @@
             border-top: 1px solid var(--rule);
             margin-top: 14px;
         }
+        .map-queue-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .map-queue-grid .card .order-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+        }
+        .map-queue-grid .card .order-row > div:first-child {
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+        }
+        .map-queue-grid .card .order-seq { flex-basis: 100%; }
+        .map-queue-grid .card .btn-group { justify-content: flex-end; }
         .table-map-right { overflow-y: auto; max-height: calc(100vh - 130px); }
         .map-empty-state {
             font-family: 'Cormorant Garamond', serif;
@@ -618,6 +633,7 @@
             .map-tile { min-height: 54px; }
             .map-tile-num { font-size: 15px; }
             .map-tile-status { font-size: 10px; }
+            .map-queue-grid { grid-template-columns: 1fr; }
         }
 
         /* ───── MOBILE (placed last so it actually overrides) ───── */
@@ -1011,10 +1027,13 @@ window.addEventListener('error', function(e){
                 divider.className = 'map-queue-divider';
                 divider.textContent = 'Queue';
                 detail.appendChild(divider);
+                const queueGrid = document.createElement('div');
+                queueGrid.className = 'map-queue-grid';
                 queueIds.forEach(id => {
                     const state = computeTableState(id, tables[id]);
-                    detail.appendChild(buildTableCardEl(id, tables[id], state));
+                    queueGrid.appendChild(buildTableCardEl(id, tables[id], state));
                 });
+                detail.appendChild(queueGrid);
             }
         }
 
