@@ -493,6 +493,35 @@
         }
         .refresh-status.error { color: var(--alert); }
 
+        /* ───── STICKY CONTROLS ───── */
+        .sticky-controls {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--cream);
+            border-bottom: 1px solid var(--rule-strong);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            padding-bottom: 8px;
+        }
+        .sticky-controls .section {
+            margin: 12px 0 0;
+        }
+
+        /* ───── TABLE SUMMARY ───── */
+        .table-summary {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            padding: 4px 0 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .table-summary .sum-item { white-space: nowrap; }
+        .table-summary .sum-alert { color: var(--alert); font-style: normal; font-weight: 700; }
+
         /* ───── MOBILE (placed last so it actually overrides) ───── */
         @media (max-width: 720px) {
             body { padding: 14px; }
@@ -590,18 +619,21 @@ window.addEventListener('error', function(e){
         </div>
     </div>
 
-    <div class="section">
-        <span class="section-num">01</span>
-        <span class="section-title">테이블 실시간 현황</span>
-        <span class="section-rule"></span>
-        <span class="section-meta">Live · 20s</span>
-        <div class="sort-toggle">
-            <button class="sort-btn active" id="sort-table" onclick="setSortMode('table')">테이블 번호순</button>
-            <button class="sort-btn" id="sort-order" onclick="setSortMode('order')">주문순</button>
+    <div class="sticky-controls">
+        <div class="section">
+            <span class="section-num">01</span>
+            <span class="section-title">테이블 실시간 현황</span>
+            <span class="section-rule"></span>
+            <span class="section-meta">Live · 20s</span>
+            <div class="sort-toggle">
+                <button class="sort-btn active" id="sort-table" onclick="setSortMode('table')">테이블 번호순</button>
+                <button class="sort-btn" id="sort-order" onclick="setSortMode('order')">주문순</button>
+            </div>
+            <input type="number" class="jump-input" min="1" placeholder="# 이동" title="테이블 번호로 이동" oninput="jumpToTable(this.value)">
         </div>
-        <input type="number" class="jump-input" min="1" placeholder="# 이동" title="테이블 번호로 이동" oninput="jumpToTable(this.value)">
+        <div class="refresh-status" id="refresh-status"></div>
+        <div class="table-summary" id="table-summary"></div>
     </div>
-    <div class="refresh-status" id="refresh-status"></div>
     <div id="display"></div>
 
     <div class="section">
@@ -609,8 +641,9 @@ window.addEventListener('error', function(e){
         <span class="section-title">메뉴 및 재고 관리</span>
         <span class="section-rule"></span>
         <span class="section-meta">Menu &amp; Stock</span>
+        <button class="sort-btn" id="menu-toggle-btn" onclick="toggleMenu()">펼치기</button>
     </div>
-    <div class="panel" id="menu-management-panel"></div>
+    <div class="panel" id="menu-management-panel" style="display:none"></div>
 
     <div class="export-actions">
         <button class="export-btn" onclick="downloadSales()">판매내역 Excel</button>
@@ -621,6 +654,13 @@ window.addEventListener('error', function(e){
     <script>
         const REFRESH_INTERVAL_MS = 20000;
         let tableSortMode = 'table';
+        let menuExpanded = false;
+
+        function toggleMenu() {
+            menuExpanded = !menuExpanded;
+            document.getElementById('menu-management-panel').style.display = menuExpanded ? '' : 'none';
+            document.getElementById('menu-toggle-btn').textContent = menuExpanded ? '접기' : '펼치기';
+        }
 
         function setSortMode(mode) {
             tableSortMode = mode;
@@ -680,11 +720,13 @@ window.addEventListener('error', function(e){
                     menuHtml += `</div></div>`;
                 });
                 menuPanel.innerHTML = menuHtml;
+                menuPanel.style.display = menuExpanded ? '' : 'none';
 
                 // ── Table cards: sort ──
                 const container = document.getElementById('display');
                 container.innerHTML = '';
 
+                let activeCount = 0, unpaidCount = 0, unservedCount = 0, overtimeCount = 0;
                 let tableIds = Object.keys(res.tables);
                 if (tableSortMode === 'order') {
                     tableIds.sort((a, b) => {
@@ -719,6 +761,10 @@ window.addEventListener('error', function(e){
                     } else {
                         isLongStay = diffMins >= 120;
                     }
+                    activeCount++;
+                    if (info.orders.some(o => !o.is_paid)) unpaidCount++;
+                    if (info.orders.some(o => o.status !== '서빙 완료')) unservedCount++;
+                    if (isLongStay) overtimeCount++;
 
                     const groupedOrders = info.orders.reduce((acc, o) => {
                         const key = `${o.menu_name}_${o.status}_${o.is_paid}`;
@@ -790,6 +836,13 @@ window.addEventListener('error', function(e){
                     card.innerHTML = html;
                     container.appendChild(card);
                 });
+
+                document.getElementById('table-summary').innerHTML = [
+                    `<span class="sum-item">활성 테이블 ${activeCount}</span>`,
+                    `<span class="sum-item${unpaidCount  > 0 ? ' sum-alert' : ''}"> · 미입금 ${unpaidCount}</span>`,
+                    `<span class="sum-item${unservedCount > 0 ? ' sum-alert' : ''}"> · 미서빙 ${unservedCount}</span>`,
+                    `<span class="sum-item${overtimeCount > 0 ? ' sum-alert' : ''}"> · 초과 ${overtimeCount}</span>`,
+                ].join('');
 
                 window.scrollTo(_pageX, _pageY);
             }).catch(() => {
