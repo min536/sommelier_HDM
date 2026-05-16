@@ -265,7 +265,7 @@
         }
         .card-top {
             display: flex; justify-content: space-between; align-items: baseline;
-            padding: 18px 20px 14px;
+            padding: 14px 20px 12px;
             border-bottom: 1px solid var(--rule);
         }
         .table-num {
@@ -314,7 +314,7 @@
         .pill-stay    { background: var(--alert-soft); color: var(--alert); }
 
         .bill {
-            padding: 14px 20px;
+            padding: 10px 20px;
             display: flex; justify-content: space-between; align-items: baseline;
             border-bottom: 1px solid var(--rule);
         }
@@ -330,11 +330,11 @@
         .all-paid .bill-amt { color: var(--success); }
         .bill-amt .krw { font-family: 'Pretendard'; font-size: 11px; color: var(--muted); margin-left: 3px; font-weight: 500; letter-spacing: 0.1em; }
 
-        .order-list { padding: 6px 20px 14px; max-height: 220px; overflow-y: auto; }
+        .order-list { padding: 4px 20px 12px; max-height: 220px; overflow-y: auto; }
         .order-row {
             display: flex; justify-content: space-between; align-items: center;
             gap: 12px;
-            padding: 12px 0; border-bottom: 1px dotted var(--rule);
+            padding: 9px 0; border-bottom: 1px dotted var(--rule);
             font-size: 14px;
         }
         .order-row:last-child { border-bottom: none; }
@@ -390,7 +390,7 @@
         .mini-btn.del { color: var(--muted); padding: 4px 6px; min-width: 31px; }
         .mini-btn.del:hover { color: var(--alert); border-color: var(--alert); }
 
-        .card-foot { padding: 0 20px 18px; margin-top: auto; }
+        .card-foot { padding: 0 20px 14px; margin-top: auto; }
         .clear-btn {
             width: 100%;
             font-family: 'Noto Serif KR', serif;
@@ -538,12 +538,16 @@
             display: grid;
             grid-template-columns: 3fr 2fr;
             gap: 18px;
-            align-items: start;
+            align-items: stretch;
+            min-height: 380px;
         }
+        .table-map-left { display: flex; flex-direction: column; }
         .table-map-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
             gap: 8px;
+            flex: 1;
         }
         .map-tile {
             background: var(--paper);
@@ -589,6 +593,18 @@
         .map-tile.tile-paid .map-tile-status { color: var(--success); }
         .map-tile.selected { border: 2px solid var(--wine); }
         #table-map-detail .card.map-selected::before { background: var(--wine); animation: none; }
+        .map-selected-banner {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 10px;
+            letter-spacing: 0.22em;
+            color: var(--wine);
+            text-transform: uppercase;
+            text-align: center;
+            padding: 4px 0 3px;
+            background: #FDF4F4;
+            border-bottom: 1px solid var(--rule);
+        }
         .map-queue-divider {
             font-family: 'Cormorant Garamond', serif;
             font-style: italic;
@@ -1009,6 +1025,10 @@ window.addEventListener('error', function(e){
                 const state = computeTableState(selectedTableId, selInfo);
                 const card = buildTableCardEl(selectedTableId, selInfo, state);
                 card.classList.add('map-selected');
+                const banner = document.createElement('div');
+                banner.className = 'map-selected-banner';
+                banner.textContent = '선택 테이블';
+                card.insertBefore(banner, card.firstChild);
                 detail.appendChild(card);
             }
 
