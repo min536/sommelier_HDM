@@ -165,7 +165,7 @@
 
         /* ───── SORT TOGGLE ───── */
         .sort-toggle {
-            display: flex; gap: 0; margin-left: auto;
+            display: flex; gap: 0;
         }
         .sort-btn {
             font-family: 'Pretendard', sans-serif;
@@ -261,6 +261,7 @@
             padding: 0;
             display: flex; flex-direction: column;
             position: relative;
+            scroll-margin-top: 96px;
         }
         .card-top {
             display: flex; justify-content: space-between; align-items: baseline;
@@ -522,6 +523,91 @@
         .table-summary .sum-item { white-space: nowrap; }
         .table-summary .sum-alert { color: var(--alert); font-style: normal; font-weight: 700; }
 
+        /* ───── CTRL GROUP ───── */
+        .ctrl-group { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+        /* ───── VIEW TOGGLE ───── */
+        .view-toggle { display: flex; gap: 0; }
+
+        /* ───── SORT DIMMED IN MAP MODE ───── */
+        .sort-controls-dimmed { opacity: 0.35; pointer-events: none; }
+
+        /* ───── TABLE MAP ───── */
+        #table-map-layout { margin-top: 18px; }
+        .table-map-layout {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 18px;
+            align-items: start;
+        }
+        .table-map-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .map-tile {
+            background: var(--paper);
+            border: 1px solid var(--rule-strong);
+            padding: 10px 6px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 66px;
+            text-align: center;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .map-tile:hover { border-color: var(--gold); }
+        .map-tile-num {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--ink);
+            line-height: 1;
+        }
+        .map-tile-status {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 5px;
+            line-height: 1;
+        }
+        .map-tile.tile-empty { background: var(--cream); }
+        .map-tile.tile-empty .map-tile-num { color: var(--muted); }
+        .map-tile.tile-overtime { background: var(--alert-soft); border-color: var(--alert); animation: tile-pulse 1.6s ease-in-out infinite; }
+        .map-tile.tile-overtime .map-tile-num { color: var(--alert); }
+        .map-tile.tile-overtime .map-tile-status { color: var(--alert); font-style: normal; font-weight: 700; }
+        @keyframes tile-pulse { 0%,100%{opacity:1} 50%{opacity:0.75} }
+        .map-tile.tile-unpaid { background: #FAF0E0; border-color: var(--gold); }
+        .map-tile.tile-unpaid .map-tile-status { color: var(--gold); font-style: normal; font-weight: 600; }
+        .map-tile.tile-unserved { background: var(--cream); border-color: var(--rule-strong); border-left: 3px solid var(--gold-soft); }
+        .map-tile.tile-unserved .map-tile-status { color: var(--gold); font-style: normal; font-weight: 600; }
+        .map-tile.tile-paid { background: var(--success-soft); border-color: var(--success); }
+        .map-tile.tile-paid .map-tile-num { color: var(--success); }
+        .map-tile.tile-paid .map-tile-status { color: var(--success); }
+        .map-tile.selected { border: 2px solid var(--wine); }
+        .table-map-right { overflow-y: auto; max-height: calc(100vh - 130px); }
+        .map-empty-state {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 14px;
+            color: var(--muted);
+            letter-spacing: 0.12em;
+            padding: 32px 20px;
+            text-align: center;
+            border: 1px dashed var(--rule-strong);
+        }
+        @media (max-width: 720px) {
+            .table-map-layout { grid-template-columns: 1fr; }
+            .table-map-right { max-height: none; }
+            .table-map-grid { gap: 6px; }
+            .map-tile { min-height: 54px; }
+            .map-tile-num { font-size: 15px; }
+            .map-tile-status { font-size: 10px; }
+        }
+
         /* ───── MOBILE (placed last so it actually overrides) ───── */
         @media (max-width: 720px) {
             body { padding: 14px; }
@@ -566,7 +652,8 @@
             .menu-card-grid { grid-template-columns: 1fr; }
             .menu-card { border-right: none; }
             .menu-card-fields .input-sm { width: 100%; }
-            .sort-toggle { margin-left: 0; }
+            .sticky-controls .section { flex-wrap: wrap; row-gap: 6px; }
+            .ctrl-group { flex-wrap: wrap; gap: 6px; }
             .sort-btn { font-size: 10px; padding: 3px 8px; }
             .credit { margin-top: 36px; font-size: 11px; letter-spacing: 0.18em; }
             .export-actions { justify-content: stretch; }
@@ -625,16 +712,33 @@ window.addEventListener('error', function(e){
             <span class="section-title">테이블 실시간 현황</span>
             <span class="section-rule"></span>
             <span class="section-meta">Live · 20s</span>
-            <div class="sort-toggle">
-                <button class="sort-btn active" id="sort-table" onclick="setSortMode('table')">테이블 번호순</button>
-                <button class="sort-btn" id="sort-order" onclick="setSortMode('order')">주문순</button>
+            <div class="ctrl-group">
+                <div class="view-toggle">
+                    <button class="sort-btn active" id="view-cards" onclick="setViewMode('cards')">카드</button>
+                    <button class="sort-btn" id="view-map" onclick="setViewMode('map')">맵</button>
+                </div>
+                <div class="sort-toggle" id="sort-controls">
+                    <button class="sort-btn active" id="sort-table" onclick="setSortMode('table')">번호순</button>
+                    <button class="sort-btn" id="sort-order" onclick="setSortMode('order')">주문순</button>
+                </div>
+                <input type="number" class="jump-input" min="1" placeholder="# 이동" title="테이블 번호로 이동" oninput="jumpToTable(this.value)">
             </div>
-            <input type="number" class="jump-input" min="1" placeholder="# 이동" title="테이블 번호로 이동" oninput="jumpToTable(this.value)">
         </div>
         <div class="refresh-status" id="refresh-status"></div>
         <div class="table-summary" id="table-summary"></div>
     </div>
     <div id="display"></div>
+
+    <div id="table-map-layout" style="display:none">
+        <div class="table-map-layout">
+            <div class="table-map-left">
+                <div class="table-map-grid" id="table-map-grid"></div>
+            </div>
+            <div class="table-map-right" id="table-map-detail">
+                <div class="map-empty-state">왼쪽에서 테이블을 선택하세요.</div>
+            </div>
+        </div>
+    </div>
 
     <div class="section">
         <span class="section-num">02</span>
@@ -655,11 +759,24 @@ window.addEventListener('error', function(e){
         const REFRESH_INTERVAL_MS = 20000;
         let tableSortMode = 'table';
         let menuExpanded = false;
+        let adminViewMode = 'cards';
+        let selectedTableId = null;
+        let lastTablesData = null;
 
         function toggleMenu() {
             menuExpanded = !menuExpanded;
             document.getElementById('menu-management-panel').style.display = menuExpanded ? '' : 'none';
             document.getElementById('menu-toggle-btn').textContent = menuExpanded ? '접기' : '펼치기';
+        }
+
+        function setViewMode(mode) {
+            adminViewMode = mode;
+            document.getElementById('view-cards').className = 'sort-btn' + (mode === 'cards' ? ' active' : '');
+            document.getElementById('view-map').className = 'sort-btn' + (mode === 'map' ? ' active' : '');
+            document.getElementById('display').style.display = mode === 'cards' ? '' : 'none';
+            document.getElementById('table-map-layout').style.display = mode === 'map' ? '' : 'none';
+            document.getElementById('sort-controls').classList.toggle('sort-controls-dimmed', mode === 'map');
+            if (mode === 'map' && lastTablesData) renderMapMode(lastTablesData);
         }
 
         function setSortMode(mode) {
@@ -686,6 +803,169 @@ window.addEventListener('error', function(e){
         function oldestPendingOrderId(tableInfo) {
             const pending = tableInfo.orders.filter(o => o.status !== '서빙 완료');
             return pending.length ? Math.min(...pending.map(o => o.order_id)) : Infinity;
+        }
+
+        function computeTableState(id, info) {
+            const diffMins = Math.floor((new Date() - new Date(info.entry_time)) / 60000);
+            const isAllPaid = info.remaining_bill === 0;
+            const wineCount = info.orders.filter(o => o.is_alcohol).length;
+            let isLongStay, allowedMins = null;
+            if (wineCount >= 1) {
+                allowedMins = 120 + (wineCount - 1) * 60;
+                isLongStay = diffMins > allowedMins;
+            } else {
+                isLongStay = diffMins >= 120;
+            }
+            return {
+                diffMins, isAllPaid, wineCount, isLongStay, allowedMins,
+                hasUnpaid: info.orders.some(o => !o.is_paid),
+                hasUnserved: info.orders.some(o => o.status !== '서빙 완료'),
+            };
+        }
+
+        function buildTableCardEl(id, info, state) {
+            const { diffMins, isAllPaid, wineCount, isLongStay, allowedMins } = state;
+            let wineTimeHtml = '';
+            if (wineCount >= 1) {
+                const allowedH = allowedMins / 60;
+                if (isLongStay) {
+                    const overMins = diffMins - allowedMins;
+                    wineTimeHtml = `<div class="wine-time wine-over">와인 ${wineCount}병 · 인정 ${allowedH}시간 · 초과 ${overMins}분</div>`;
+                } else {
+                    wineTimeHtml = `<div class="wine-time">와인 ${wineCount}병 · 인정 ${allowedH}시간</div>`;
+                }
+            }
+            const groupedOrders = info.orders.reduce((acc, o) => {
+                const key = `${o.menu_name}_${o.status}_${o.is_paid}`;
+                if (!acc[key]) {
+                    acc[key] = { ...o, count: 0, orderIds: [], minOrderId: o.order_id, minDisplayTime: o.time };
+                } else {
+                    acc[key].minOrderId = Math.min(acc[key].minOrderId, o.order_id);
+                    acc[key].minDisplayTime = o.time < acc[key].minDisplayTime ? o.time : acc[key].minDisplayTime;
+                }
+                acc[key].count += 1;
+                acc[key].orderIds.push(o.order_id);
+                return acc;
+            }, {});
+            const card = document.createElement('div');
+            card.className = `card ${isAllPaid ? 'all-paid' : ''} ${isLongStay ? 'long-stay' : ''}`;
+            card.dataset.tableId = id;
+            let pill = '';
+            if (isLongStay) pill = '<span class="pill pill-stay">Long stay</span>';
+            else if (isAllPaid) pill = '<span class="pill pill-paid">Paid</span>';
+            else pill = '<span class="pill pill-pending">Pending</span>';
+            let html = `
+                        <div class="card-top">
+                            <div class="table-num"><span class="latin-no">No.</span>${id}번 테이블${pill}</div>
+                            <div class="table-time">${formatDuration(diffMins)}</div>
+                        </div>
+                        <div class="bill">
+                            <span class="bill-label">${isAllPaid ? 'Settled' : 'Remaining'}</span>
+                            <span class="bill-amt">${info.remaining_bill.toLocaleString()}<span class="krw">원</span></span>
+                        </div>
+                        ${wineTimeHtml}
+                        <div class="order-list">`;
+            Object.values(groupedOrders)
+                .sort((a, b) => {
+                    const doneA = a.status === '서빙 완료';
+                    const doneB = b.status === '서빙 완료';
+                    if (doneA !== doneB) return doneA ? 1 : -1;
+                    return a.minOrderId - b.minOrderId;
+                })
+                .forEach(group => {
+                    const isDone = group.status === '서빙 완료';
+                    const idList = JSON.stringify(group.orderIds);
+                    html += `
+                            <div class="order-row ${isDone?'done':''}">
+                                <div>
+                                    <span class="order-seq">#${group.minOrderId} · ${group.minDisplayTime}</span>
+                                    <span class="order-name">${escapeHtml(group.menu_name)}</span>
+                                    <span class="order-count">× ${group.count}</span>
+                                </div>
+                                <div class="btn-group">
+                                    <button class="mini-btn pay ${group.is_paid?'is-paid':''}" onclick='batchProcess("item_pay", "${id}", ${idList})'>
+                                        ${group.is_paid?'완료':'입금'}
+                                    </button>
+                                    <button class="mini-btn serve ${isDone?'is-done':''}" onclick='batchProcess("serve", "${id}", ${idList})'>
+                                        ${isDone?'취소':'서빙'}
+                                    </button>
+                                    <button class="mini-btn del" onclick='batchProcess("cancel", "${id}", ${idList})'>×</button>
+                                </div>
+                            </div>`;
+                });
+            html += `</div>
+                        <div class="card-foot">
+                            <button class="clear-btn" onclick="clearT('${id}')">테이블 비우기 · Clear</button>
+                        </div>`;
+            card.innerHTML = html;
+            return card;
+        }
+
+        function getTilePriorityClass(state) {
+            if (state.isLongStay) return 'tile-overtime';
+            if (state.hasUnpaid) return 'tile-unpaid';
+            if (state.hasUnserved) return 'tile-unserved';
+            if (state.isAllPaid) return 'tile-paid';
+            return 'tile-empty';
+        }
+
+        function buildMapTileEl(n, tables) {
+            const id = String(n);
+            const info = tables[id];
+            const tile = document.createElement('div');
+            const isSelected = selectedTableId === id;
+            if (!info) {
+                tile.className = `map-tile tile-empty${isSelected ? ' selected' : ''}`;
+                tile.innerHTML = `<span class="map-tile-num">${n}</span>`;
+            } else {
+                const state = computeTableState(id, info);
+                const priorityClass = getTilePriorityClass(state);
+                tile.className = `map-tile ${priorityClass}${isSelected ? ' selected' : ''}`;
+                let statusText = '';
+                if (state.isLongStay) statusText = '초과';
+                else if (state.hasUnpaid) statusText = '미입금';
+                else if (state.hasUnserved) statusText = formatDuration(state.diffMins);
+                else if (state.isAllPaid) statusText = '완료';
+                tile.innerHTML = `<span class="map-tile-num">${n}</span>${statusText ? `<span class="map-tile-status">${escapeHtml(statusText)}</span>` : ''}`;
+            }
+            tile.onclick = () => selectMapTable(id);
+            return tile;
+        }
+
+        function renderMapMode(tables) {
+            const grid = document.getElementById('table-map-grid');
+            grid.innerHTML = '';
+            for (let n = 1; n <= 25; n++) {
+                grid.appendChild(buildMapTileEl(n, tables));
+            }
+            renderMapDetail(tables);
+        }
+
+        function selectMapTable(id) {
+            selectedTableId = id;
+            if (lastTablesData) renderMapMode(lastTablesData);
+        }
+
+        function renderMapDetail(tables) {
+            const detail = document.getElementById('table-map-detail');
+            if (!selectedTableId) {
+                for (let n = 1; n <= 25; n++) {
+                    if (tables[String(n)]) { selectedTableId = String(n); break; }
+                }
+            }
+            if (!selectedTableId) {
+                detail.innerHTML = '<div class="map-empty-state">왼쪽에서 테이블을 선택하세요.</div>';
+                return;
+            }
+            const info = tables[selectedTableId];
+            if (!info) {
+                detail.innerHTML = '<div class="map-empty-state">선택한 테이블에 주문이 없습니다.</div>';
+                return;
+            }
+            const state = computeTableState(selectedTableId, info);
+            const card = buildTableCardEl(selectedTableId, info, state);
+            detail.innerHTML = '';
+            detail.appendChild(card);
         }
 
         function refresh() {
@@ -741,100 +1021,12 @@ window.addEventListener('error', function(e){
 
                 tableIds.forEach(id => {
                     const info = res.tables[id];
-                    const diffMins = Math.floor((new Date() - new Date(info.entry_time)) / 60000);
-                    const isAllPaid = info.remaining_bill === 0;
-
-                    // Wine allowance: 1 bottle → 2 h, each additional bottle → +1 h
-                    const wineCount = info.orders.filter(o => o.is_alcohol).length;
-                    let isLongStay;
-                    let wineTimeHtml = '';
-                    if (wineCount >= 1) {
-                        const allowedMins = 120 + (wineCount - 1) * 60;
-                        const allowedH = allowedMins / 60;
-                        isLongStay = diffMins > allowedMins;
-                        if (isLongStay) {
-                            const overMins = diffMins - allowedMins;
-                            wineTimeHtml = `<div class="wine-time wine-over">와인 ${wineCount}병 · 인정 ${allowedH}시간 · 초과 ${overMins}분</div>`;
-                        } else {
-                            wineTimeHtml = `<div class="wine-time">와인 ${wineCount}병 · 인정 ${allowedH}시간</div>`;
-                        }
-                    } else {
-                        isLongStay = diffMins >= 120;
-                    }
+                    const state = computeTableState(id, info);
                     activeCount++;
-                    if (info.orders.some(o => !o.is_paid)) unpaidCount++;
-                    if (info.orders.some(o => o.status !== '서빙 완료')) unservedCount++;
-                    if (isLongStay) overtimeCount++;
-
-                    const groupedOrders = info.orders.reduce((acc, o) => {
-                        const key = `${o.menu_name}_${o.status}_${o.is_paid}`;
-                        if (!acc[key]) {
-                            acc[key] = { ...o, count: 0, orderIds: [], minOrderId: o.order_id, minDisplayTime: o.time };
-                        } else {
-                            acc[key].minOrderId = Math.min(acc[key].minOrderId, o.order_id);
-                            acc[key].minDisplayTime = o.time < acc[key].minDisplayTime ? o.time : acc[key].minDisplayTime;
-                        }
-                        acc[key].count += 1;
-                        acc[key].orderIds.push(o.order_id);
-                        return acc;
-                    }, {});
-
-                    const card = document.createElement('div');
-                    card.className = `card ${isAllPaid ? 'all-paid' : ''} ${isLongStay ? 'long-stay' : ''}`;
-                    card.dataset.tableId = id;
-
-                    let pill = '';
-                    if (isLongStay) pill = '<span class="pill pill-stay">Long stay</span>';
-                    else if (isAllPaid) pill = '<span class="pill pill-paid">Paid</span>';
-                    else pill = '<span class="pill pill-pending">Pending</span>';
-
-                    let html = `
-                        <div class="card-top">
-                            <div class="table-num"><span class="latin-no">No.</span>${id}번 테이블${pill}</div>
-                            <div class="table-time">${formatDuration(diffMins)}</div>
-                        </div>
-                        <div class="bill">
-                            <span class="bill-label">${isAllPaid ? 'Settled' : 'Remaining'}</span>
-                            <span class="bill-amt">${info.remaining_bill.toLocaleString()}<span class="krw">원</span></span>
-                        </div>
-                        ${wineTimeHtml}
-                        <div class="order-list">`;
-
-                    Object.values(groupedOrders)
-                        .sort((a, b) => {
-                            const doneA = a.status === '서빙 완료';
-                            const doneB = b.status === '서빙 완료';
-                            if (doneA !== doneB) return doneA ? 1 : -1;
-                            return a.minOrderId - b.minOrderId;
-                        })
-                        .forEach(group => {
-                        const isDone = group.status === '서빙 완료';
-                        const idList = JSON.stringify(group.orderIds);
-                        html += `
-                            <div class="order-row ${isDone?'done':''}">
-                                <div>
-                                    <span class="order-seq">#${group.minOrderId} · ${group.minDisplayTime}</span>
-                                    <span class="order-name">${escapeHtml(group.menu_name)}</span>
-                                    <span class="order-count">× ${group.count}</span>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="mini-btn pay ${group.is_paid?'is-paid':''}" onclick='batchProcess("item_pay", "${id}", ${idList})'>
-                                        ${group.is_paid?'완료':'입금'}
-                                    </button>
-                                    <button class="mini-btn serve ${isDone?'is-done':''}" onclick='batchProcess("serve", "${id}", ${idList})'>
-                                        ${isDone?'취소':'서빙'}
-                                    </button>
-                                    <button class="mini-btn del" onclick='batchProcess("cancel", "${id}", ${idList})'>×</button>
-                                </div>
-                            </div>`;
-                    });
-
-                    html += `</div>
-                        <div class="card-foot">
-                            <button class="clear-btn" onclick="clearT('${id}')">테이블 비우기 · Clear</button>
-                        </div>`;
-                    card.innerHTML = html;
-                    container.appendChild(card);
+                    if (state.hasUnpaid) unpaidCount++;
+                    if (state.hasUnserved) unservedCount++;
+                    if (state.isLongStay) overtimeCount++;
+                    container.appendChild(buildTableCardEl(id, info, state));
                 });
 
                 document.getElementById('table-summary').innerHTML = [
@@ -843,6 +1035,9 @@ window.addEventListener('error', function(e){
                     `<span class="sum-item${unservedCount > 0 ? ' sum-alert' : ''}"> · 미서빙 ${unservedCount}</span>`,
                     `<span class="sum-item${overtimeCount > 0 ? ' sum-alert' : ''}"> · 초과 ${overtimeCount}</span>`,
                 ].join('');
+
+                lastTablesData = res.tables;
+                if (adminViewMode === 'map') renderMapMode(res.tables);
 
                 window.scrollTo(_pageX, _pageY);
             }).catch(() => {
@@ -853,7 +1048,14 @@ window.addEventListener('error', function(e){
         }
 
         function jumpToTable(val) {
-            const card = document.querySelector(`#display [data-table-id="${String(val).trim()}"]`);
+            const id = String(val).trim();
+            if (!id) return;
+            if (adminViewMode === 'map') {
+                selectedTableId = id;
+                if (lastTablesData) renderMapMode(lastTablesData);
+                return;
+            }
+            const card = document.querySelector(`#display [data-table-id="${id}"]`);
             if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
