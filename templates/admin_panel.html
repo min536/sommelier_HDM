@@ -23,6 +23,7 @@
             --success-soft: #E8F0EB;
             --alert: #C53030;
             --alert-soft: #FCEAEA;
+            --card-h: 362px;
         }
         * { box-sizing: border-box; }
         body {
@@ -262,6 +263,7 @@
             display: flex; flex-direction: column;
             position: relative;
             scroll-margin-top: 96px;
+            height: var(--card-h);
         }
         .card-top {
             display: flex; justify-content: space-between; align-items: baseline;
@@ -330,7 +332,7 @@
         .all-paid .bill-amt { color: var(--success); }
         .bill-amt .krw { font-family: 'Pretendard'; font-size: 11px; color: var(--muted); margin-left: 3px; font-weight: 500; letter-spacing: 0.1em; }
 
-        .order-list { padding: 4px 20px 12px; max-height: 220px; overflow-y: auto; }
+        .order-list { padding: 4px 20px 12px; flex: 1; overflow-y: auto; max-height: none; }
         .order-row {
             display: flex; justify-content: space-between; align-items: center;
             gap: 12px;
@@ -543,17 +545,9 @@
         .table-map-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
             gap: 8px;
-        }
-        #table-map-detail .card {
-            height: 290px;
-            display: flex;
-            flex-direction: column;
-        }
-        #table-map-detail .order-list {
-            flex: 1;
-            overflow-y: auto;
-            max-height: none;
+            height: var(--card-h);
         }
         .map-tile {
             background: var(--paper);
