@@ -588,6 +588,18 @@
         .map-tile.tile-paid .map-tile-num { color: var(--success); }
         .map-tile.tile-paid .map-tile-status { color: var(--success); }
         .map-tile.selected { border: 2px solid var(--wine); }
+        #table-map-detail .card.map-selected::before { background: var(--wine); animation: none; }
+        .map-queue-divider {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            color: var(--muted);
+            text-transform: uppercase;
+            padding: 10px 0 6px;
+            border-top: 1px solid var(--rule);
+            margin-top: 14px;
+        }
         .table-map-right { overflow-y: auto; max-height: calc(100vh - 130px); }
         .map-empty-state {
             font-family: 'Cormorant Garamond', serif;
@@ -948,24 +960,62 @@ window.addEventListener('error', function(e){
 
         function renderMapDetail(tables) {
             const detail = document.getElementById('table-map-detail');
+
+            // auto-select by oldest pending order if nothing selected
             if (!selectedTableId) {
-                for (let n = 1; n <= 25; n++) {
-                    if (tables[String(n)]) { selectedTableId = String(n); break; }
-                }
+                const ids = Object.keys(tables).sort((a, b) => {
+                    const minA = oldestPendingOrderId(tables[a]);
+                    const minB = oldestPendingOrderId(tables[b]);
+                    return minA !== minB ? minA - minB : Number(a) - Number(b);
+                });
+                if (ids.length) selectedTableId = ids[0];
             }
-            if (!selectedTableId) {
-                detail.innerHTML = '<div class="map-empty-state">왼쪽에서 테이블을 선택하세요.</div>';
-                return;
-            }
-            const info = tables[selectedTableId];
-            if (!info) {
-                detail.innerHTML = '<div class="map-empty-state">선택한 테이블에 주문이 없습니다.</div>';
-                return;
-            }
-            const state = computeTableState(selectedTableId, info);
-            const card = buildTableCardEl(selectedTableId, info, state);
+
             detail.innerHTML = '';
-            detail.appendChild(card);
+
+            // no active tables at all
+            if (!selectedTableId) {
+                const empty = document.createElement('div');
+                empty.className = 'map-empty-state';
+                empty.textContent = '활성 테이블이 없습니다.';
+                detail.appendChild(empty);
+                return;
+            }
+
+            // selected card
+            const selInfo = tables[selectedTableId];
+            if (!selInfo) {
+                const empty = document.createElement('div');
+                empty.className = 'map-empty-state';
+                empty.textContent = '선택한 테이블에 주문이 없습니다.';
+                detail.appendChild(empty);
+            } else {
+                const state = computeTableState(selectedTableId, selInfo);
+                const card = buildTableCardEl(selectedTableId, selInfo, state);
+                card.classList.add('map-selected');
+                detail.appendChild(card);
+            }
+
+            // queue: top 2 active tables by oldest pending order, excluding selected
+            const queueIds = Object.keys(tables)
+                .filter(id => id !== selectedTableId)
+                .sort((a, b) => {
+                    const minA = oldestPendingOrderId(tables[a]);
+                    const minB = oldestPendingOrderId(tables[b]);
+                    return minA !== minB ? minA - minB : Number(a) - Number(b);
+                })
+                .slice(0, 2);
+
+            if (queueIds.length) {
+                const divider = document.createElement('div');
+                divider.className = 'map-queue-divider';
+                divider.textContent = 'Queue';
+                detail.appendChild(divider);
+                queueIds.forEach(id => {
+                    const state = computeTableState(id, tables[id]);
+                    detail.appendChild(buildTableCardEl(id, tables[id], state));
+                });
+            }
         }
 
         function refresh() {
