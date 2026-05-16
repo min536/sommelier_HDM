@@ -13,20 +13,22 @@ _KST = ZoneInfo("Asia/Seoul")
 ROOT = Path(__file__).resolve().parent
 DEFAULT_SQLITE_PATH = ROOT / "sommelier.sqlite3"
 
+# display_order controls menu display sequence (lower = first)
+# Food order: 파스타(5) → 소시지(6) → 해시브라운(7) → 오레오베이컨말이(8) → 나초(9) → 치즈케이크(10)
 INITIAL_MENU = [
-    {"id": 1, "category": "liquor", "name": "Jaume Serra Cava(스파클링)", "price": 32000, "is_alcohol": True, "stock": 20, "img": "sparkling.png", "is_best": False},
-    {"id": 2, "category": "liquor", "name": "Rapel Carilisa Moscato(디저트)", "price": 28000, "is_alcohol": True, "stock": 40, "img": "dessert.png", "is_best": False},
-    {"id": 3, "category": "liquor", "name": "Umani Ronchi Vigor(레드)", "price": 37000, "is_alcohol": True, "stock": 20, "img": "red.png", "is_best": False},
-    {"id": 4, "category": "liquor", "name": "Montford Estate(화이트)", "price": 35000, "is_alcohol": True, "stock": 20, "img": "white.png", "is_best": False},
-    {"id": 5, "category": "food", "name": "나쵸 세트", "price": 15000, "is_alcohol": False, "stock": 50, "img": "nacho.png", "is_best": False},
-    {"id": 6, "category": "food", "name": "오레오베이컨말이(6pcs)", "price": 13000, "is_alcohol": False, "stock": 40, "img": "oreo.png", "is_best": True},
-    {"id": 7, "category": "food", "name": "해시브라운(3pcs)", "price": 15000, "is_alcohol": False, "stock": 40, "img": "brown.png", "is_best": False},
-    {"id": 8, "category": "food", "name": "소시지 플래터", "price": 19000, "is_alcohol": False, "stock": 50, "img": "sausage.png", "is_best": False},
-    {"id": 9, "category": "food", "name": "버섯크림 파스타", "price": 23000, "is_alcohol": False, "stock": 50, "img": "pasta.png", "is_best": True},
-    {"id": 10, "category": "food", "name": "치즈케이크", "price": 8000, "is_alcohol": False, "stock": 30, "img": "cheeze.png", "is_best": False},
-    {"id": 11, "category": "etc", "name": "합석 비용", "price": 5000, "is_alcohol": False, "stock": 999, "img": "plus.png", "is_best": False},
-    {"id": 12, "category": "etc", "name": "물", "price": 1000, "is_alcohol": False, "stock": 100, "img": "water.png", "is_best": False},
-    {"id": 13, "category": "etc", "name": "프리미엄 와인(판매 이전 운영팀 문의)", "price": 100000, "is_alcohol": True, "stock": 6, "img": "premium.png", "is_best": False},
+    {"id": 1,  "display_order": 1,  "category": "liquor", "name": "Jaume Serra Cava(스파클링)", "price": 32000, "is_alcohol": True,  "stock": 20,  "img": "sparkling.png", "is_best": False},
+    {"id": 2,  "display_order": 2,  "category": "liquor", "name": "Rapel Carilisa Moscato(디저트)", "price": 28000, "is_alcohol": True,  "stock": 40,  "img": "dessert.png",  "is_best": False},
+    {"id": 3,  "display_order": 3,  "category": "liquor", "name": "Umani Ronchi Vigor(레드)", "price": 37000, "is_alcohol": True,  "stock": 20,  "img": "red.png",      "is_best": False},
+    {"id": 4,  "display_order": 4,  "category": "liquor", "name": "Montford Estate(화이트)", "price": 35000, "is_alcohol": True,  "stock": 20,  "img": "white.png",    "is_best": False},
+    {"id": 9,  "display_order": 5,  "category": "food",   "name": "뒥셀 크림 파스타", "price": 23000, "is_alcohol": False, "stock": 50,  "img": "pasta.png",    "is_best": True},
+    {"id": 8,  "display_order": 6,  "category": "food",   "name": "소시지 플래터", "price": 19000, "is_alcohol": False, "stock": 50,  "img": "sausage.png",  "is_best": False},
+    {"id": 7,  "display_order": 7,  "category": "food",   "name": "해시브라운(3pcs)", "price": 15000, "is_alcohol": False, "stock": 40,  "img": "brown.png",    "is_best": False},
+    {"id": 6,  "display_order": 8,  "category": "food",   "name": "오레오베이컨말이(6pcs)", "price": 13000, "is_alcohol": False, "stock": 40,  "img": "oreo.png",     "is_best": True},
+    {"id": 5,  "display_order": 9,  "category": "food",   "name": "나쵸 세트", "price": 15000, "is_alcohol": False, "stock": 50,  "img": "nacho.png",    "is_best": False},
+    {"id": 10, "display_order": 10, "category": "food",   "name": "치즈케이크", "price": 8000,  "is_alcohol": False, "stock": 30,  "img": "cheeze.png",   "is_best": False},
+    {"id": 11, "display_order": 11, "category": "etc",    "name": "합석 비용", "price": 5000,  "is_alcohol": False, "stock": 999, "img": "plus.png",     "is_best": False},
+    {"id": 12, "display_order": 12, "category": "etc",    "name": "물", "price": 1000,  "is_alcohol": False, "stock": 100, "img": "water.png",    "is_best": False},
+    {"id": 13, "display_order": 13, "category": "etc",    "name": "프리미엄 와인(판매 이전 운영팀 문의)", "price": 100000, "is_alcohol": True,  "stock": 6,   "img": "premium.png",  "is_best": False},
 ]
 
 LEGACY_IMAGE_NAME_UPDATES = {
@@ -70,7 +72,8 @@ def init_db() -> None:
             is_alcohol INTEGER NOT NULL DEFAULT 0,
             stock INTEGER NOT NULL DEFAULT 0,
             img TEXT NOT NULL,
-            is_best INTEGER NOT NULL DEFAULT 0
+            is_best INTEGER NOT NULL DEFAULT 0,
+            display_order INTEGER NOT NULL DEFAULT 0
         )
         """,
         """
@@ -139,8 +142,8 @@ def init_db() -> None:
             conn.executemany(
                 """
                 INSERT INTO menu_items
-                (id, category, name, price, is_alcohol, stock, img, is_best)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (id, category, name, price, is_alcohol, stock, img, is_best, display_order)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 [
                     (
@@ -152,6 +155,7 @@ def init_db() -> None:
                         item["stock"],
                         item["img"],
                         int(item["is_best"]),
+                        item["display_order"],
                     )
                     for item in INITIAL_MENU
                 ],
@@ -159,6 +163,21 @@ def init_db() -> None:
         conn.executemany(
             "UPDATE menu_items SET img = ? WHERE img = ?",
             [(current, legacy) for legacy, current in LEGACY_IMAGE_NAME_UPDATES.items()],
+        )
+        # Migrate existing installations: add display_order column if missing
+        try:
+            conn.execute("ALTER TABLE menu_items ADD COLUMN display_order INTEGER NOT NULL DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass  # column already exists
+        # Always sync display_order values (idempotent)
+        conn.executemany(
+            "UPDATE menu_items SET display_order = ? WHERE id = ?",
+            [(item["display_order"], item["id"]) for item in INITIAL_MENU],
+        )
+        # Rename pasta item in existing installations
+        conn.execute(
+            "UPDATE menu_items SET name = '뒥셀 크림 파스타'"
+            " WHERE name IN ('버섯크림 파스타', '버섯 크림 파스타')"
         )
         conn.execute(
             """
@@ -198,7 +217,7 @@ def get_menu_items(guest_only: bool = False) -> list[dict[str, object]]:
     if guest_only:
         query += " WHERE is_alcohol = 0 AND name <> ?"
         params = ("합석 비용",)
-    query += " ORDER BY id"
+    query += " ORDER BY display_order, id"
     with connection() as conn:
         rows = conn.execute(query, params).fetchall()
     return [_menu_row(row) for row in rows]
@@ -240,7 +259,7 @@ def get_table_status(table_id: str) -> dict[str, object]:
 def get_dashboard_data() -> dict[str, object]:
     with connection() as conn:
         menu_rows = conn.execute(
-            "SELECT id, category, name, price, is_alcohol, stock, img, is_best FROM menu_items ORDER BY id"
+            "SELECT id, category, name, price, is_alcohol, stock, img, is_best FROM menu_items ORDER BY display_order, id"
         ).fetchall()
         metrics = conn.execute(
             "SELECT cumulative_revenue FROM app_metrics WHERE id = 1"
@@ -258,9 +277,11 @@ def get_dashboard_data() -> dict[str, object]:
                 o.price,
                 o.status,
                 o.is_paid,
-                o.display_time
+                o.display_time,
+                COALESCE(mi.is_alcohol, 0) AS is_alcohol
             FROM dining_tables t
             LEFT JOIN orders o ON o.table_id = t.table_id
+            LEFT JOIN menu_items mi ON mi.id = o.menu_item_id
             ORDER BY CAST(t.table_id AS INTEGER), t.table_id, o.id
             """
         ).fetchall()
@@ -285,6 +306,7 @@ def get_dashboard_data() -> dict[str, object]:
             "status": row["status"],
             "is_paid": bool(row["is_paid"]),
             "time": row["display_time"],
+            "is_alcohol": bool(row["is_alcohol"]),
         }
         tables[table_id]["orders"].append(order)
         if not order["is_paid"]:

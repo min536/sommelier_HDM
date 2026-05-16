@@ -127,6 +127,28 @@
             margin-bottom: 4px;
         }
         .account-num { font-weight: 700; color: var(--ink); letter-spacing: 0.02em; }
+        .copy-btn {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            font-family: 'Pretendard', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            background: var(--paper);
+            border: 1px solid var(--rule-strong);
+            padding: 7px 14px;
+            cursor: pointer;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .copy-btn:hover { color: var(--ink); border-color: var(--gold); }
+        .copy-msg {
+            font-size: 12px;
+            color: var(--success);
+            margin-top: 5px;
+            letter-spacing: 0.06em;
+        }
 
         /* ───── STATUS ───── */
         .status {
@@ -347,6 +369,8 @@ window.addEventListener('error', function(e){
             <div class="account-label">Payment</div>
             <div class="account-num">기업은행 982-180252-01-010</div>
             <div style="font-size:12px; color:var(--muted); margin-top:2px;">예금주 · 백지훈</div>
+            <button class="copy-btn" onclick="copyAccount()">계좌번호 복사</button>
+            <div class="copy-msg" id="copy-msg" style="display:none;">복사되었습니다.</div>
         </div>
     </div>
 
@@ -369,7 +393,7 @@ window.addEventListener('error', function(e){
         {% for menu in menus if menu.category == 'food' %}
         <div class="card {% if menu.stock <= 0 %}sold{% endif %}">
             {% if menu.is_best and menu.stock > 0 %}
-            <div class="badge">Recommend</div>
+            <div class="badge">{% if '오레오베이컨말이' in menu.name %}LIMIT{% else %}Recommend{% endif %}</div>
             {% endif %}
             <div class="card-img-wrap">
                 {% if menu.stock <= 0 %}<div class="sold-stamp">Sold out</div>{% endif %}
@@ -417,6 +441,29 @@ window.addEventListener('error', function(e){
 </div>
 
 <script>
+    function copyAccount() {
+        const text = '기업은행 982-180252-01-010';
+        function showMsg() {
+            const msg = document.getElementById('copy-msg');
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 2000);
+        }
+        function fallback() {
+            const el = document.createElement('textarea');
+            el.value = text;
+            el.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
+            document.body.appendChild(el);
+            el.select();
+            try { document.execCommand('copy'); showMsg(); } catch(e) {}
+            document.body.removeChild(el);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(showMsg).catch(fallback);
+        } else {
+            fallback();
+        }
+    }
+
     const params = new URLSearchParams(window.location.search);
     const tableId = params.get('table');
 

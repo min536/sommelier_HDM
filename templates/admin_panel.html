@@ -463,6 +463,23 @@
             text-transform: uppercase;
         }
 
+        /* ───── WINE TIME ───── */
+        .wine-time {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 12px;
+            color: var(--muted);
+            padding: 5px 20px 7px;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid var(--rule);
+        }
+        .wine-time.wine-over {
+            color: var(--alert);
+            font-style: normal;
+            font-weight: 700;
+            font-size: 12.5px;
+        }
+
         /* ───── REFRESH STATUS ───── */
         .refresh-status {
             font-family: 'Cormorant Garamond', serif;
@@ -683,8 +700,25 @@ window.addEventListener('error', function(e){
                 tableIds.forEach(id => {
                     const info = res.tables[id];
                     const diffMins = Math.floor((new Date() - new Date(info.entry_time)) / 60000);
-                    const isLongStay = diffMins >= 120;
                     const isAllPaid = info.remaining_bill === 0;
+
+                    // Wine allowance: 1 bottle → 2 h, each additional bottle → +1 h
+                    const wineCount = info.orders.filter(o => o.is_alcohol).length;
+                    let isLongStay;
+                    let wineTimeHtml = '';
+                    if (wineCount >= 1) {
+                        const allowedMins = 120 + (wineCount - 1) * 60;
+                        const allowedH = allowedMins / 60;
+                        isLongStay = diffMins > allowedMins;
+                        if (isLongStay) {
+                            const overMins = diffMins - allowedMins;
+                            wineTimeHtml = `<div class="wine-time wine-over">와인 ${wineCount}병 · 인정 ${allowedH}시간 · 초과 ${overMins}분</div>`;
+                        } else {
+                            wineTimeHtml = `<div class="wine-time">와인 ${wineCount}병 · 인정 ${allowedH}시간</div>`;
+                        }
+                    } else {
+                        isLongStay = diffMins >= 120;
+                    }
 
                     const groupedOrders = info.orders.reduce((acc, o) => {
                         const key = `${o.menu_name}_${o.status}_${o.is_paid}`;
@@ -717,6 +751,7 @@ window.addEventListener('error', function(e){
                             <span class="bill-label">${isAllPaid ? 'Settled' : 'Remaining'}</span>
                             <span class="bill-amt">${info.remaining_bill.toLocaleString()}<span class="krw">원</span></span>
                         </div>
+                        ${wineTimeHtml}
                         <div class="order-list">`;
 
                     Object.values(groupedOrders)
