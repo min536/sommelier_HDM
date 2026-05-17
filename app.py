@@ -17,6 +17,7 @@ from db import (
     get_table_status as get_table_status_record,
     init_db,
     place_order as place_order_record,
+    reset_operation_data as reset_operation_data_record,
     toggle_item_pay as toggle_item_pay_record,
     toggle_serve as toggle_serve_record,
     update_menu_item,
@@ -196,6 +197,18 @@ def export_sales():
 @app.route('/api/table_status/<table_id>', methods=['GET'])
 def get_table_status(table_id):
     return jsonify(get_table_status_record(str(table_id)))
+
+@app.route('/api/admin/reset_operation_data', methods=['POST'])
+@_admin_required
+def reset_operation_data():
+    req = request.get_json(silent=True)
+    if req is None:
+        return _bad("요청 본문이 올바른 JSON 형식이어야 합니다.")
+    if req.get('confirm') != 'RESET':
+        return _bad("확인 코드가 올바르지 않습니다. 'RESET'을 정확히 입력하세요.")
+    reset_operation_data_record()
+    return jsonify({"status": "success"})
+
 
 @app.route('/api/admin/update_menu', methods=['POST'])
 @_admin_required
