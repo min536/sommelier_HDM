@@ -567,6 +567,22 @@ def cancel_order(table_id: str, order_id: int) -> bool:
             raise
 
 
+def reset_operation_data() -> None:
+    """Delete all operation/order/sales data while preserving menu_items. Idempotent."""
+    with connection() as conn:
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            conn.execute("DELETE FROM orders")
+            conn.execute("DELETE FROM dining_tables")
+            conn.execute("DELETE FROM order_ledger")
+            conn.execute("DELETE FROM sales_stats")
+            conn.execute("UPDATE app_metrics SET cumulative_revenue = 0 WHERE id = 1")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+
 def clear_table(table_id: str) -> bool:
     with connection() as conn:
         try:

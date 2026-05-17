@@ -87,6 +87,25 @@
             cursor: pointer;
         }
         .export-btn:hover { background: var(--wine-deep); }
+        .reset-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+        .reset-btn {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            border: 1px solid var(--rule-strong);
+            background: transparent;
+            color: var(--muted);
+            min-height: 34px;
+            padding: 0 12px;
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+        .reset-btn:hover { border-color: var(--alert); color: var(--alert); background: var(--alert-soft); }
         .logout-btn {
             font-family: 'Cormorant Garamond', serif;
             font-style: italic;
@@ -797,6 +816,10 @@ window.addEventListener('error', function(e){
         <button class="export-btn" onclick="downloadSales()">판매내역 Excel</button>
     </div>
 
+    <div class="reset-actions">
+        <button class="reset-btn" onclick="confirmReset()">테스트 데이터 초기화</button>
+    </div>
+
     <div class="credit">— System designed by 동민 · 창식 —</div>
 
     <script>
@@ -1209,6 +1232,34 @@ window.addEventListener('error', function(e){
 
         function downloadSales() {
             window.location.href = '/api/admin/export_sales';
+        }
+
+        function confirmReset() {
+            const code = prompt(
+                '⚠️ 경고: 모든 주문 내역, 매출, 판매 통계가 초기화됩니다.\n' +
+                '이 작업은 되돌릴 수 없습니다.\n\n' +
+                '계속하려면 RESET을 입력하세요.'
+            );
+            if (code === null) return;
+            if (code !== 'RESET') {
+                alert('입력한 코드가 올바르지 않습니다. 초기화가 취소되었습니다.');
+                return;
+            }
+            fetch('/api/admin/reset_operation_data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ confirm: 'RESET' })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('✅ 테스트 데이터가 초기화되었습니다. 페이지를 새로고침합니다.');
+                    location.reload();
+                } else {
+                    alert('❌ 초기화에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
+                }
+            })
+            .catch(() => alert('❌ 서버 연결에 실패했습니다.'));
         }
 
         setInterval(refresh, REFRESH_INTERVAL_MS);
