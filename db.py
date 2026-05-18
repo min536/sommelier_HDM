@@ -22,8 +22,8 @@ INITIAL_MENU = [
     {"id": 4,  "display_order": 4,  "category": "liquor", "name": "Montford Estate(화이트)", "price": 35000, "is_alcohol": True,  "stock": 20,  "img": "white.png",    "is_best": False},
     {"id": 9,  "display_order": 5,  "category": "food",   "name": "뒥셀 크림 파스타", "price": 23000, "is_alcohol": False, "stock": 50,  "img": "pasta.png",    "is_best": True},
     {"id": 8,  "display_order": 6,  "category": "food",   "name": "소시지 플래터", "price": 19000, "is_alcohol": False, "stock": 50,  "img": "sausage.png",  "is_best": False},
-    {"id": 7,  "display_order": 7,  "category": "food",   "name": "해시브라운(3pcs)", "price": 15000, "is_alcohol": False, "stock": 40,  "img": "brown.png",    "is_best": False},
-    {"id": 6,  "display_order": 8,  "category": "food",   "name": "오레오베이컨말이(6pcs)", "price": 13000, "is_alcohol": False, "stock": 40,  "img": "oreo.png",     "is_best": True},
+    {"id": 7,  "display_order": 7,  "category": "food",   "name": "해시브라운(4pcs)", "price": 15000, "is_alcohol": False, "stock": 40,  "img": "brown.png",    "is_best": False},
+    {"id": 6,  "display_order": 8,  "category": "food",   "name": "오레오베이컨말이(5pcs)", "price": 13000, "is_alcohol": False, "stock": 40,  "img": "oreo.png",     "is_best": True},
     {"id": 5,  "display_order": 9,  "category": "food",   "name": "나쵸 세트", "price": 15000, "is_alcohol": False, "stock": 50,  "img": "nacho.png",    "is_best": False},
     {"id": 10, "display_order": 10, "category": "food",   "name": "치즈케이크", "price": 8000,  "is_alcohol": False, "stock": 30,  "img": "cheeze.png",   "is_best": False},
     {"id": 12, "display_order": 12, "category": "etc",    "name": "물", "price": 1000,  "is_alcohol": False, "stock": 100, "img": "water.png",    "is_best": False},
@@ -180,6 +180,9 @@ def init_db() -> None:
         )
         # Remove 합석 비용 from existing installations
         conn.execute("DELETE FROM menu_items WHERE name = '합석 비용'")
+        # Update pcs counts
+        conn.execute("UPDATE menu_items SET name = '해시브라운(4pcs)' WHERE name = '해시브라운(3pcs)'")
+        conn.execute("UPDATE menu_items SET name = '오레오베이컨말이(5pcs)' WHERE name = '오레오베이컨말이(6pcs)'")
         conn.execute(
             """
             INSERT OR IGNORE INTO order_ledger
