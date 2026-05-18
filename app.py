@@ -24,6 +24,8 @@ from db import (
 )
 
 app = Flask(__name__)
+# Cache static assets (menu images, CSS, JS) for 2 hours during event operation.
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 7200
 app.secret_key = os.environ.get('SECRET_KEY', 'sommelier-dev-fallback-key-change-in-prod')
 if not os.environ.get('SECRET_KEY'):
     import logging
