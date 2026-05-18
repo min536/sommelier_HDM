@@ -637,6 +637,7 @@ window.addEventListener('error', function(e){
 <script>
     let currentTable = document.getElementById('target-table-id').value;
     let cart = [];
+    let cartOrder = []; // tracks insertion order to keep modal rows stable
     let submitting = false;
 
     function changeTable() {
@@ -651,6 +652,7 @@ window.addEventListener('error', function(e){
         const name = btn.getAttribute('data-name');
         const price = parseInt(btn.getAttribute('data-price'));
         cart.push({ name, price });
+        if (!cartOrder.includes(name)) cartOrder.push(name);
         updateCartBar();
     }
 
@@ -673,7 +675,7 @@ window.addEventListener('error', function(e){
             acc[i.name].count++;
             return acc;
         }, {});
-        list.innerHTML = Object.keys(grouped).map(name => {
+        list.innerHTML = cartOrder.filter(name => grouped[name]).map(name => {
             const safeName = name.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
             const { price, count } = grouped[name];
             return `
@@ -697,6 +699,7 @@ window.addEventListener('error', function(e){
 
     function addToCartFromModal(name, price) {
         cart.push({ name, price });
+        if (!cartOrder.includes(name)) cartOrder.push(name);
         updateCartBar();
         renderCartModal();
     }
@@ -704,6 +707,7 @@ window.addEventListener('error', function(e){
     function removeFromCart(name) {
         const idx = cart.findIndex(i => i.name === name);
         if (idx !== -1) cart.splice(idx, 1);
+        if (!cart.some(i => i.name === name)) cartOrder = cartOrder.filter(n => n !== name);
         updateCartBar();
         if (cart.length === 0) { closeCart(); return; }
         renderCartModal();
