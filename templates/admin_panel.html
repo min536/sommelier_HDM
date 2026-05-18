@@ -992,7 +992,7 @@ window.addEventListener('error', function(e){
                 if (state.isLongStay) statusText = '초과';
                 else if (state.hasUnpaid) statusText = '미입금';
                 else if (state.hasUnserved) statusText = formatDuration(state.diffMins);
-                else if (state.isAllPaid) statusText = '완료';
+                else if (state.isAllPaid) statusText = `완료 · ${formatDuration(state.diffMins)}`;
                 tile.innerHTML = `<span class="map-tile-num">${n}</span>${statusText ? `<span class="map-tile-status">${escapeHtml(statusText)}</span>` : ''}`;
             }
             tile.onclick = () => selectMapTable(id);
