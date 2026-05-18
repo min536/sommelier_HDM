@@ -4,3 +4,4 @@ __pycache__/
 sommelier.sqlite3
 sommelier.sqlite3-wal
 sommelier.sqlite3-shm
+static_original_backup/
