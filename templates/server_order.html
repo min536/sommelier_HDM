@@ -588,7 +588,7 @@ window.addEventListener('error', function(e){
             <div class="card-img-wrap">
                 {% if menu.stock <= 0 %}<div class="sold-overlay">Sold out</div>{% endif %}
                 {% if '프리미엄' in menu.name %}
-                <div style="font-family:'Noto Serif KR',serif;font-size:13px;font-weight:600;color:var(--wine-deep);text-align:center;line-height:1.7;padding:0 12px;">운영팀 문의<br>꼭 해주세요</div>
+                <div style="font-family:'Noto Serif KR',serif;font-size:26px;font-weight:600;color:var(--wine-deep);text-align:center;line-height:1.7;padding:0 12px;">운영팀 문의<br>꼭 해주세요</div>
                 {% else %}
                 <img src="/static/{{ menu.img }}" style="{% if menu.stock <= 0 %}filter: grayscale(1);{% endif %}">
                 {% endif %}
