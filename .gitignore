@@ -5,3 +5,4 @@ sommelier.sqlite3
 sommelier.sqlite3-wal
 sommelier.sqlite3-shm
 .img-venv/
+.img-venv/
