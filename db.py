@@ -28,6 +28,7 @@ INITIAL_MENU = [
     {"id": 10, "display_order": 10, "category": "food",   "name": "치즈케이크", "price": 8000,  "is_alcohol": False, "stock": 30,  "img": "cheeze.png",   "is_best": False},
     {"id": 12, "display_order": 12, "category": "etc",    "name": "물", "price": 1000,  "is_alcohol": False, "stock": 100, "img": "water.png",    "is_best": False},
     {"id": 13, "display_order": 13, "category": "etc",    "name": "프리미엄 와인(판매 이전 운영팀 문의)", "price": 100000, "is_alcohol": True,  "stock": 6,   "img": "premium.png",  "is_best": False},
+    {"id": 14, "display_order": 14, "category": "etc",    "name": "콜키지",                               "price": 10000,  "is_alcohol": False, "stock": 100, "img": "corkage.png",  "is_best": False},
 ]
 
 LEGACY_IMAGE_NAME_UPDATES = {
@@ -180,6 +181,14 @@ def init_db() -> None:
         )
         # Remove 합석 비용 from existing installations
         conn.execute("DELETE FROM menu_items WHERE name = '합석 비용'")
+        # Add 콜키지 to existing installations
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO menu_items
+            (id, category, name, price, is_alcohol, stock, img, is_best, display_order)
+            VALUES (14, 'etc', '콜키지', 10000, 0, 100, 'corkage.png', 0, 14)
+            """
+        )
         # Update pcs counts
         conn.execute("UPDATE menu_items SET name = '해시브라운(4pcs)' WHERE name = '해시브라운(3pcs)'")
         conn.execute("UPDATE menu_items SET name = '오레오베이컨말이(5pcs)' WHERE name = '오레오베이컨말이(6pcs)'")

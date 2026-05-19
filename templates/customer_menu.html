@@ -423,10 +423,17 @@ window.addEventListener('error', function(e){
             {% endif %}
             <div class="card-img-wrap">
                 {% if menu.stock <= 0 %}<div class="sold-stamp">Sold out</div>{% endif %}
+                {% if '콜키지' in menu.name %}
+                <div style="font-family:'Noto Serif KR',serif;font-size:26px;font-weight:600;color:var(--wine-deep);text-align:center;line-height:1.7;padding:0 12px;">콜키지</div>
+                {% else %}
                 <img src="/static/{{ menu.img }}" alt="{{ menu.name }}">
+                {% endif %}
             </div>
             <div class="card-body">
                 <div class="card-name">{{ menu.name }}</div>
+                {% if '콜키지' in menu.name %}
+                <div style="font-size:11px;color:#888;text-align:center;margin-top:2px;">콜키지 비용(와인만 가능)</div>
+                {% endif %}
                 <div class="card-rule"></div>
                 <div class="card-price">{{ menu.price | format_price }}<span class="krw">원</span></div>
             </div>
