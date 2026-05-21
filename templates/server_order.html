@@ -592,7 +592,7 @@ window.addEventListener('error', function(e){
                 {% elif '콜키지' in menu.name %}
                 <div style="font-family:'Noto Serif KR',serif;font-size:26px;font-weight:600;color:var(--wine-deep);text-align:center;line-height:1.7;padding:0 12px;">콜키지<br>(와인만 가능)</div>
                 {% else %}
-                <img src="/static/{{ menu.img }}" style="{% if menu.stock <= 0 %}filter: grayscale(1);{% endif %}">
+                <img src="/static/{{ menu.img }}" style="{% if menu.stock <= 0 %}filter: grayscale(1);{% endif %}" decoding="async">
                 {% endif %}
             </div>
             <div class="card-body">
