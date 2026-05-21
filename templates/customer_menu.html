@@ -425,6 +425,8 @@ window.addEventListener('error', function(e){
                 {% if menu.stock <= 0 %}<div class="sold-stamp">Sold out</div>{% endif %}
                 {% if '콜키지' in menu.name %}
                 <div style="font-family:'Noto Serif KR',serif;font-size:26px;font-weight:600;color:var(--wine-deep);text-align:center;line-height:1.7;padding:0 12px;">콜키지<br>(와인만 가능)</div>
+                {% elif '프리미엄' in menu.name %}
+                <div style="font-family:'Noto Serif KR',serif;font-size:26px;font-weight:600;color:var(--wine-deep);text-align:center;line-height:1.7;padding:0 12px;">운영팀 문의<br>꼭 해주세요</div>
                 {% else %}
                 <img src="/static/{{ menu.img }}" alt="{{ menu.name }}" decoding="async">
                 {% endif %}
