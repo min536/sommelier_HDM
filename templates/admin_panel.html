@@ -878,7 +878,7 @@ window.addEventListener('error', function(e){
             const wineCount = info.orders.filter(o => o.is_alcohol).length;
             let isLongStay, allowedMins = null;
             if (wineCount >= 1) {
-                allowedMins = 120 + (wineCount - 1) * 60;
+                allowedMins = 100 + (wineCount - 1) * 60;
                 isLongStay = diffMins > allowedMins;
             } else {
                 isLongStay = diffMins >= 120;
@@ -894,12 +894,12 @@ window.addEventListener('error', function(e){
             const { diffMins, isAllPaid, wineCount, isLongStay, allowedMins } = state;
             let wineTimeHtml = '';
             if (wineCount >= 1) {
-                const allowedH = allowedMins / 60;
+                const allowedStr = formatDuration(allowedMins);
                 if (isLongStay) {
                     const overMins = diffMins - allowedMins;
-                    wineTimeHtml = `<div class="wine-time wine-over">와인 ${wineCount}병 · 인정 ${allowedH}시간 · 초과 ${overMins}분</div>`;
+                    wineTimeHtml = `<div class="wine-time wine-over">와인 ${wineCount}병 · 인정 ${allowedStr} · 초과 ${overMins}분</div>`;
                 } else {
-                    wineTimeHtml = `<div class="wine-time">와인 ${wineCount}병 · 인정 ${allowedH}시간</div>`;
+                    wineTimeHtml = `<div class="wine-time">와인 ${wineCount}병 · 인정 ${allowedStr}</div>`;
                 }
             }
             const groupedOrders = info.orders.reduce((acc, o) => {
