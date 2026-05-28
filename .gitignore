@@ -1,7 +1,35 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.python-version
+.venv/
+venv/
+.img-venv/
+
+# Local OS/editor files
 .DS_Store
-sommelier.sqlite3
-sommelier.sqlite3-wal
-sommelier.sqlite3-shm
+.vscode/
+.idea/
+.claude/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime data and local backups
+data.json
+*.sqlite
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.db
+instance/
+logs/
+*.log
+*.xlsx
+
+# Local-only snapshots and uploaded copies
+uploads/
+templates.old/
 static_original_backup/

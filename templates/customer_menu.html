@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="고려대학교 소믈리에 주점 통합 관리 시스템">
+    <meta property="og:title" content="고려대학교 소믈리에 주점 통합 관리 시스템">
+    <meta property="og:description" content="고려대학교 소믈리에 주점 통합 관리 시스템">
+    <meta name="twitter:description" content="고려대학교 소믈리에 주점 통합 관리 시스템">
     <title>소믈리에 주점 | 메뉴</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -367,8 +371,8 @@ window.addEventListener('error', function(e){
         </div>
         <div class="account">
             <div class="account-label">Payment</div>
-            <div class="account-num">기업은행 982-180252-01-010</div>
-            <div style="font-size:12px; color:var(--muted); margin-top:2px;">예금주 · 백지훈</div>
+            <div class="account-num">{{ payment_account }}</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">예금주 · {{ payment_holder }}</div>
             <button class="copy-btn" onclick="copyAccount()">계좌번호 복사</button>
             <div class="copy-msg" id="copy-msg" style="display:none;">복사되었습니다.</div>
         </div>
@@ -448,7 +452,7 @@ window.addEventListener('error', function(e){
 
 <script>
     function copyAccount() {
-        const text = '기업은행 982-180252-01-010';
+        const text = {{ payment_account | tojson }};
         function showMsg() {
             const msg = document.getElementById('copy-msg');
             msg.style.display = 'block';

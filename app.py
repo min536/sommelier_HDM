@@ -1,12 +1,16 @@
 import functools
 import hmac
+import logging
 import os
 from io import BytesIO
 
+from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template, request, send_file, session, url_for
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
+
+load_dotenv()
 
 from db import (
     cancel_order as cancel_order_record,
@@ -27,16 +31,32 @@ app = Flask(__name__)
 # Cache static assets (menu images, CSS, JS) for 2 hours during event operation.
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 7200
 app.secret_key = os.environ.get('SECRET_KEY', 'sommelier-dev-fallback-key-change-in-prod')
+logger = logging.getLogger(__name__)
 if not os.environ.get('SECRET_KEY'):
-    import logging
-    logging.getLogger(__name__).warning(
+    logger.warning(
         'SECRET_KEY env var not set — using development fallback. '
         'Set SECRET_KEY before deploying to a shared network.'
     )
 init_db()
 
-_ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'tedchang')
-_ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'changsikhi')
+_ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
+_ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'change-me')
+_PAYMENT_ACCOUNT = os.environ.get('PAYMENT_ACCOUNT', '은행명 000-000000-00-000')
+_PAYMENT_HOLDER = os.environ.get('PAYMENT_HOLDER', '운영팀')
+
+if not os.environ.get('ADMIN_PASSWORD'):
+    logger.warning(
+        'ADMIN_PASSWORD env var not set — using public demo fallback. '
+        'Set ADMIN_USERNAME and ADMIN_PASSWORD before deploying.'
+    )
+
+
+@app.context_processor
+def inject_operation_config():
+    return {
+        "payment_account": _PAYMENT_ACCOUNT,
+        "payment_holder": _PAYMENT_HOLDER,
+    }
 
 
 def _check_credentials(username: str, password: str) -> bool:

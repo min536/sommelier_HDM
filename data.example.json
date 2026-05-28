@@ -1,0 +1,27 @@
+{
+  "menu": [
+    {
+      "id": 1,
+      "category": "food",
+      "name": "샘플 메뉴",
+      "price": 10000,
+      "is_alcohol": false,
+      "stock": 20,
+      "img": "nacho.png",
+      "is_best": true
+    },
+    {
+      "id": 2,
+      "category": "etc",
+      "name": "샘플 음료",
+      "price": 3000,
+      "is_alcohol": false,
+      "stock": 50,
+      "img": "water.png",
+      "is_best": false
+    }
+  ],
+  "tables": {},
+  "cumulative_revenue": 0,
+  "sales_stats": {}
+}

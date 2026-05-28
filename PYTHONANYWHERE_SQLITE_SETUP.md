@@ -33,7 +33,7 @@ sommelier.sqlite3
 
 ```bash
 git clone <your-repo-url>
-cd sommelier_HDM
+cd korea-university-sommelier-event-pos
 ```
 
 ### 파일 업로드
@@ -90,7 +90,7 @@ PythonAnywhere Web 탭에서:
 ```python
 import sys
 
-path = "/home/YOURUSERNAME/sommelier_HDM"
+path = "/home/YOURUSERNAME/korea-university-sommelier-event-pos"
 if path not in sys.path:
     sys.path.insert(0, path)
 
@@ -105,14 +105,14 @@ WSGI import와 충돌하지 않는다.
 기본값은 프로젝트 루트의:
 
 ```text
-/home/YOURUSERNAME/sommelier_HDM/sommelier.sqlite3
+/home/YOURUSERNAME/korea-university-sommelier-event-pos/sommelier.sqlite3
 ```
 
 다른 위치를 쓰고 싶으면 WSGI 파일에서 import 전에 환경변수를 잡는다.
 
 ```python
 import os
-os.environ["SQLITE_PATH"] = "/home/YOURUSERNAME/sommelier_HDM/sommelier.sqlite3"
+os.environ["SQLITE_PATH"] = "/home/YOURUSERNAME/korea-university-sommelier-event-pos/sommelier.sqlite3"
 ```
 
 ## 8. Static files 매핑
@@ -121,7 +121,7 @@ os.environ["SQLITE_PATH"] = "/home/YOURUSERNAME/sommelier_HDM/sommelier.sqlite3"
 
 ```text
 URL:       /static/
-Directory: /home/YOURUSERNAME/sommelier_HDM/static
+Directory: /home/YOURUSERNAME/korea-university-sommelier-event-pos/static
 ```
 
 추가 후 웹앱을 Reload 한다.
@@ -153,4 +153,3 @@ sommelier.sqlite3
 ```
 
 운영 전/후로 이 파일만 따로 내려받아도 상태 백업이 가능하다.
-
